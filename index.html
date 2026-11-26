@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0d0a1f">
 <title>漢字ブースト⑤ 書き取りバトル — 書いた漢字で敵をたおせ</title>
 <!-- 書き順データ: KanjiVG (https://kanjivg.tagaini.net, © Ulrich Apel, CC BY-SA 3.0) -->
 <style>
-:root{--c0:#ff4fd8;--c1:#35e6ff;--c2:#fff23a;--fc:#ff4fd8;--vh:1vh}
+/* 世界観: 夜のライブステージ。ミク系のティール #39C5BB を軸に、桜ピンク・ラベンダー・白のキラキラのパステルネオン。
+   --c0..c2 は JS がステージの盛り上がり (PAL) に合わせて入れなおす */
+:root{--c0:#39c5bb;--c1:#ff8fc8;--c2:#b9a2ff;--fc:#39c5bb;--vh:1vh}
 /* 実際の表示領域の 1% (JS が innerHeight から入れなおす)。dvh があればそれを先に使う */
 @supports (height:1dvh){:root{--vh:1dvh}}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{height:100%;background:#000;overflow:hidden;color:#fff;overscroll-behavior:none;
+html,body{height:100%;background:#0d0a1f;overflow:hidden;color:#fff;overscroll-behavior:none;
   font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;touch-action:manipulation}
 canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #bg{z-index:0}
@@ -21,25 +23,25 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
   padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
 .hide{display:none!important}
 .glow{text-shadow:0 0 10px var(--c0),0 0 26px var(--c1),0 0 54px var(--c2)}
-.grad{background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c0));background-size:300% 100%;
-  -webkit-background-clip:text;background-clip:text;color:transparent;animation:gradrun 1.2s linear infinite}
+.grad{background:linear-gradient(90deg,#5fe0d4,#ff8fc8,#c3aeff,#fff,#5fe0d4);background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:gradrun 3s linear infinite}
 @keyframes gradrun{to{background-position:300% 0}}
 
 /* ───── タイトル ───── */
 #title .logo{font-weight:900;line-height:.95;text-align:center;transform:rotate(-6deg)}
 #title .logo .a{display:block;font-size:min(34vw,calc(22*var(--vh)));-webkit-text-stroke:3px #fff;filter:drop-shadow(0 0 18px var(--c0)) drop-shadow(0 0 40px var(--c1))}
 #title .logo .b{display:block;font-size:min(15vw,calc(9*var(--vh)));font-style:italic;letter-spacing:.05em;color:#fff;margin-top:.1em}
-#title .logo .b i{font-style:normal;color:var(--c2)}
+#title .logo .b i{font-style:normal;color:#ff8fc8}
 #title .logo .c{display:inline-block;font-size:min(9vw,calc(5.4*var(--vh)));font-style:normal;margin-top:.15em;padding:0 .3em;border:4px solid #fff;border-radius:.3em;
-  color:#000;background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2));box-shadow:0 0 20px var(--c1);transform:rotate(4deg)}
+  color:#1a0f2e;background:linear-gradient(90deg,#5fe0d4,#ffa6d2,#c9b5ff);box-shadow:0 0 20px #39c5bb,0 0 40px rgba(255,143,200,.5);transform:rotate(4deg)}
 #title .sub{margin-top:calc(3*var(--vh));font-size:min(4.6vw,calc(2.7*var(--vh)));font-weight:800;text-align:center;line-height:1.6;opacity:.95}
 #title .stats{margin-top:calc(1.2*var(--vh));font-size:min(3.8vw,calc(2.3*var(--vh)));font-weight:700;opacity:.85;text-align:center;line-height:1.5}
 .btns{display:flex;flex-direction:column;gap:calc(1.4*var(--vh));margin-top:calc(3*var(--vh));width:min(86vw,440px)}
-.btn{font:inherit;font-weight:900;font-size:min(7vw,calc(4.2*var(--vh)));padding:calc(1.4*var(--vh)) 0;border-radius:999px;border:4px solid #fff;color:#000;cursor:pointer;
-  background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2));box-shadow:0 0 24px var(--c0),0 0 60px var(--c1);letter-spacing:.08em}
+.btn{font:inherit;font-weight:900;font-size:min(7vw,calc(4.2*var(--vh)));padding:calc(1.4*var(--vh)) 0;border-radius:999px;border:4px solid #fff;color:#1a0f2e;cursor:pointer;
+  background:linear-gradient(90deg,#5fe0d4,#ffa6d2,#c9b5ff);box-shadow:0 0 20px rgba(57,197,187,.85),0 0 50px rgba(255,143,200,.55);letter-spacing:.08em}
 .btn.main{animation:throb .7s ease-in-out infinite}
-.btn.sub2{background:rgba(0,0,0,.55);color:#fff;border-color:var(--c1);box-shadow:0 0 18px var(--c1);font-size:min(5.4vw,calc(3.2*var(--vh)))}
-.btn.zk{border-color:#ffc83d;box-shadow:0 0 18px #ffc83d}
+.btn.sub2{background:rgba(22,12,44,.62);color:#fff;border-color:var(--c1);box-shadow:0 0 18px var(--c1);font-size:min(5.4vw,calc(3.2*var(--vh)))}
+.btn.zk{border-color:#ffd36b;box-shadow:0 0 18px #ffd36b}
 .btn:active{transform:scale(.94)}
 @keyframes throb{50%{transform:scale(1.06)}}
 .hint{margin-top:calc(2.2*var(--vh));font-size:min(3.4vw,calc(2*var(--vh)));opacity:.7;text-align:center;line-height:1.5}
@@ -61,13 +63,13 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 @keyframes bump{0%{transform:scale(1.7)}100%{transform:scale(1)}}
 #gaugeSlot{flex:none;width:clamp(48px,15%,120px);height:100%}
 #hp{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;height:100%;font-weight:900}
-#hp .lb{font-size:clamp(8px,min(2.6vw,calc(1.4*var(--vh))),14px);letter-spacing:.06em;color:#ff6b84;text-shadow:0 0 8px #ff0030}
+#hp .lb{font-size:clamp(8px,min(2.6vw,calc(1.4*var(--vh))),14px);letter-spacing:.06em;color:#ffa6d2;text-shadow:0 0 8px #ff4fa0}
 #hearts{display:flex;gap:1px;font-size:clamp(11px,min(3.45vw,calc(2.9*var(--vh))),26px);line-height:1}
-#hearts span{color:#ff3d6e;text-shadow:0 0 8px #ff0040,0 0 18px #ff0040;transition:opacity .2s}
-#hearts span.x{color:#333;text-shadow:none;opacity:.6}
+#hearts span{color:#ff7eb6;text-shadow:0 0 6px #ff4fa0,0 0 16px #ff8fc8;transition:opacity .2s}
+#hearts span.x{color:#3a3052;text-shadow:none;opacity:.6}
 #hearts span.lost{animation:heartlost .6s ease-out}
 #hearts span.gain{animation:bump .4s cubic-bezier(.2,2,.4,1)}
-@keyframes heartlost{0%{transform:scale(2.2);color:#fff;text-shadow:0 0 20px #fff,0 0 40px #ff0040}100%{transform:scale(1)}}
+@keyframes heartlost{0%{transform:scale(2.2);color:#fff;text-shadow:0 0 20px #fff,0 0 40px #ff4fa0}100%{transform:scale(1)}}
 #hp.hurt{animation:hpHurt .5s ease-out}
 @keyframes hpHurt{0%,30%{transform:translateX(-8px)}15%,45%{transform:translateX(8px)}60%{transform:none}}
 #hp.low #hearts span:not(.x){animation:throb .45s infinite}
@@ -76,27 +78,27 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #arena{position:relative;flex:1 1 0;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;overflow:visible}
 #status{flex:none;font-size:clamp(10px,min(3.1vw,calc(1.75*var(--vh))),17px);height:1.45em;line-height:1.45em;font-weight:900;
   font-variant-numeric:tabular-nums;letter-spacing:.04em;white-space:nowrap;text-shadow:0 0 6px #000;max-width:100%;overflow:hidden}
-#status .fast{color:var(--c2)}
+#status .fast{color:#7ff0e6}
 #foeRoom{flex:1 1 0;min-height:0}
 #ticker{flex:none;font-size:clamp(11px,min(3.6vw,calc(1.9*var(--vh))),19px);height:1.4em;line-height:1.4em;font-weight:800;opacity:.95;
   white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 6px #000,0 0 3px #000}
-#ticker.ok{color:#9dff9a}#ticker.ng{color:#ff6b84}#ticker.hl{color:var(--c2)}
+#ticker.ok{color:#8ff5e6}#ticker.ng{color:#ff6b84}#ticker.hl{color:#ffe58a}
 #prompt{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;
-  padding:.1em .7em .25em;border-radius:14px;border:3px solid var(--fc);background:rgba(4,2,10,.72);
-  box-shadow:0 0 16px var(--fc),inset 0 0 18px rgba(0,0,0,.8);max-width:100%}
+  padding:.1em .7em .25em;border-radius:16px;border:3px solid var(--fc);background:rgba(16,9,34,.8);
+  box-shadow:0 0 14px var(--fc),0 0 34px rgba(255,143,200,.22),inset 0 0 18px rgba(0,0,0,.7);max-width:100%}
 /* 敵を札の横に出すとき (縦長で、札の下に余白が無い): 札は左に寄せる */
 #arena.side #prompt{align-self:flex-start;margin-left:2px}
-#prompt.boss{border-width:4px;box-shadow:0 0 22px var(--fc),0 0 50px #ff2040,inset 0 0 18px rgba(0,0,0,.8)}
+#prompt.boss{border-width:4px;box-shadow:0 0 22px var(--fc),0 0 50px #ffd36b,inset 0 0 18px rgba(0,0,0,.7)}
 #prompt.in{animation:cardin .2s cubic-bezier(.2,1.4,.4,1)}
 @keyframes cardin{0%{transform:scale(.2);opacity:0;filter:blur(10px)}100%{transform:scale(1);opacity:1;filter:blur(0)}}
 #reading{font-size:clamp(11px,min(4.4vw,calc(2.3*var(--vh))),24px);min-height:1.15em;font-weight:900;letter-spacing:.12em;text-shadow:0 0 8px #000,0 0 18px var(--c1);line-height:1.15}
 #word{font-size:clamp(20px,min(8.6vw,calc(4.8*var(--vh))),52px);min-height:1.08em;font-weight:900;line-height:1.08;white-space:nowrap;
   text-shadow:0 0 6px #000,0 0 22px var(--c0),0 0 48px var(--c1)}
-.hole{display:inline-block;min-width:1em;text-align:center;border:.06em dashed var(--c2);border-radius:.14em;color:var(--c2);
+.hole{display:inline-block;min-width:1em;text-align:center;border:.06em dashed #ff9ccf;border-radius:.14em;color:#ffd1ea;
   animation:holeb .5s steps(2) infinite;margin:0 .04em}
-@keyframes holeb{50%{border-color:#fff;color:#fff}}
+@keyframes holeb{50%{border-color:#5fe0d4;color:#fff}}
 .hole.filled{border-color:transparent;animation:fill .35s cubic-bezier(.2,2,.4,1);color:#fff;
-  text-shadow:0 0 12px var(--c2),0 0 30px var(--c2),0 0 60px #fff}
+  text-shadow:0 0 12px #39c5bb,0 0 30px #ff8fc8,0 0 60px #fff}
 .hole.failed{border-color:transparent;animation:fill .35s cubic-bezier(.2,2,.4,1);color:#ff6b84;text-shadow:0 0 12px #ff0030}
 @keyframes fill{0%{transform:scale(2.4) rotate(12deg)}100%{transform:scale(1)}}
 #foeHp{display:flex;align-items:center;gap:6px;margin-top:.15em;white-space:nowrap;font-weight:900;font-size:clamp(9px,min(2.9vw,calc(1.6*var(--vh))),16px);height:1.3em}
@@ -104,30 +106,30 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 /* 体力ゲージは幅を決めて、画数ぶんの目盛りで割る (21画のボスでも札が広がりすぎない) */
 #foeBar{display:flex;gap:2px;height:.75em;width:clamp(70px,32vw,190px)}
 #foeBar i{display:block;flex:1;max-width:14px;background:var(--fc);box-shadow:0 0 6px var(--fc);border-radius:2px;transition:background .15s}
-#foeBar i.x{background:#2a2a2a;box-shadow:none}
+#foeBar i.x{background:#2c2440;box-shadow:none}
 #foeBar i.hit{animation:segHit .35s ease-out}
 @keyframes segHit{0%{background:#fff;transform:scaleY(2.4);box-shadow:0 0 14px #fff}}
-#prompt.boss #foeHp .nm{color:#ffd23d;animation:holeb .4s steps(2) infinite}
+#prompt.boss #foeHp .nm{color:#ffd36b;animation:holeb .4s steps(2) infinite}
 #prompt.boss #foeBar{height:1em}
-#prompt.boss #foeBar i{background:linear-gradient(#ffe066,#ff2a50);box-shadow:0 0 10px #ff2a50}
-#prompt.boss #foeBar i.x{background:#2a2a2a;box-shadow:none}
+#prompt.boss #foeBar i{background:linear-gradient(#ffe58a,#ff6fb5);box-shadow:0 0 10px #ff6fb5}
+#prompt.boss #foeBar i.x{background:#2c2440;box-shadow:none}
 /* 書き取りエリア: 大きさは layoutPad() が px で入れる */
 #padArea{flex:none;width:100%;display:flex;align-items:center;justify-content:center}
-#padWrap{position:relative;border-radius:20px;border:4px solid var(--c1);background:rgba(3,3,12,.9);
-  box-shadow:0 0 22px var(--c1),0 0 54px var(--c0),inset 0 0 40px rgba(0,0,0,.8)}
+#padWrap{position:relative;border-radius:20px;border:4px solid var(--c0);background:rgba(12,7,28,.9);
+  box-shadow:0 0 20px var(--c0),0 0 50px var(--c1),inset 0 0 40px rgba(0,0,0,.75)}
 #padWrap.hit{animation:padhit .35s ease-out}
-@keyframes padhit{0%{border-color:#fff;box-shadow:0 0 50px #fff,0 0 110px var(--c2),inset 0 0 40px rgba(0,0,0,.8)}}
+@keyframes padhit{0%{border-color:#fff;box-shadow:0 0 50px #fff,0 0 110px #39c5bb,inset 0 0 40px rgba(0,0,0,.8)}}
 #padWrap.bad{animation:padbad .45s ease-out}
 @keyframes padbad{0%,40%{border-color:#ff3355;box-shadow:0 0 50px #ff3355,0 0 100px #ff0030,inset 0 0 40px rgba(0,0,0,.8)}}
 #padWrap.done{animation:paddone .7s ease-out}
-@keyframes paddone{0%{border-color:#fff;box-shadow:0 0 80px #fff,0 0 160px var(--c2),0 0 240px var(--c0),inset 0 0 40px rgba(0,0,0,.8)}}
+@keyframes paddone{0%{border-color:#fff;box-shadow:0 0 80px #fff,0 0 160px #ffd36b,0 0 240px #ff8fc8,inset 0 0 40px rgba(0,0,0,.8)}}
 #pad{display:block;touch-action:none;cursor:crosshair;border-radius:16px}
 #strokeCnt{position:absolute;right:12px;top:8px;font-weight:900;font-size:clamp(11px,min(4vw,calc(2.2*var(--vh))),22px);pointer-events:none;
   font-variant-numeric:tabular-nums;text-shadow:0 0 8px var(--c1);opacity:.85}
 /* 操作ボタンは細く */
 #ctrl{flex:none;display:flex;gap:10px;width:min(100%,520px);padding:0 4px;margin-top:4px}
 .cbtn{flex:1;font:inherit;font-weight:900;font-size:clamp(12px,min(4vw,calc(2.2*var(--vh))),20px);padding:.3em 0;border-radius:999px;border:2px solid var(--c1);
-  background:rgba(0,0,0,.6);color:#fff;cursor:pointer;box-shadow:0 0 10px var(--c1);min-height:32px}
+  background:rgba(22,12,44,.62);color:#fff;cursor:pointer;box-shadow:0 0 10px var(--c1);min-height:32px}
 .cbtn:active{transform:scale(.94)}
 .cbtn:disabled{opacity:.35}
 /* 横長の画面 (縦横比 6:5 以上): 敵を左、書き取りエリアを右に。欄は画面の高さいっぱい */
@@ -155,7 +157,7 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 @keyframes slam2{0%,15%{opacity:0;transform:translateY(30px)}30%,75%{opacity:1;transform:none}100%{opacity:0}}
 .pop{position:fixed;z-index:3;pointer-events:none;font-weight:900;font-size:min(8vw,calc(5*var(--vh)));white-space:nowrap;
   animation:popup .85s ease-out forwards;-webkit-text-stroke:1px #000;text-shadow:0 0 12px var(--c2),0 0 26px var(--c0)}
-.pop.big{font-size:min(11vw,calc(7*var(--vh)));color:var(--c2)}
+.pop.big{font-size:min(11vw,calc(7*var(--vh)));color:#fff;text-shadow:0 0 12px #ff8fc8,0 0 28px #39c5bb}
 .pop.ng{color:#ff4466;text-shadow:0 0 12px #ff0030,0 0 26px #ff0030}
 .pop.dmg{color:#fff;font-size:min(9vw,calc(5.6*var(--vh)));text-shadow:0 0 10px var(--fc),0 0 24px var(--fc)}
 @keyframes popup{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}18%{transform:translate(-50%,-90%) scale(1.35)}100%{transform:translate(-50%,-280%) scale(1);opacity:0}}
@@ -165,13 +167,13 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #rhead{font-size:min(8vw,calc(4.6*var(--vh)));font-weight:900;letter-spacing:.1em}
 #rank{font-size:min(40vw,calc(22*var(--vh)));font-weight:900;line-height:1;-webkit-text-stroke:4px #fff;filter:drop-shadow(0 0 20px var(--c0)) drop-shadow(0 0 50px var(--c2))}
 #rscore{font-size:min(13vw,calc(7.4*var(--vh)));font-weight:900;font-variant-numeric:tabular-nums}
-#rnew{font-size:min(6vw,calc(3.4*var(--vh)));font-weight:900;color:var(--c2);animation:throb .5s infinite;height:calc(4.2*var(--vh))}
+#rnew{font-size:min(6vw,calc(3.4*var(--vh)));font-weight:900;color:#ffd36b;animation:throb .5s infinite;height:calc(4.2*var(--vh))}
 #rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,560px);margin:calc(1.4*var(--vh)) 0}
-#rgrid div{background:rgba(0,0,0,.5);border:2px solid var(--c1);border-radius:14px;padding:8px 2px;text-align:center;font-weight:900}
+#rgrid div{background:rgba(22,12,44,.58);border:2px solid var(--c1);border-radius:14px;padding:8px 2px;text-align:center;font-weight:900}
 #rgrid b{display:block;font-size:min(6.4vw,calc(3.6*var(--vh)))}#rgrid span{font-size:min(3vw,calc(1.7*var(--vh)));opacity:.8}
 .rT{font-weight:900;font-size:min(4.4vw,calc(2.6*var(--vh)));margin-top:calc(.8*var(--vh));text-align:center}
 #rdone{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(94vw,620px);margin-top:calc(.8*var(--vh))}
-#rdone b{display:inline-block;font-size:min(8vw,calc(4.4*var(--vh)));line-height:1.2;padding:2px 8px;border-radius:10px;border:2px solid var(--c1);background:rgba(0,0,0,.5)}
+#rdone b{display:inline-block;font-size:min(8vw,calc(4.4*var(--vh)));line-height:1.2;padding:2px 8px;border-radius:10px;border:2px solid var(--c1);background:rgba(22,12,44,.58)}
 #rdone b.gold{border-color:#ffc83d;color:#ffe9a0;box-shadow:0 0 12px #ffc83d}
 #rmiss{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:min(94vw,620px);margin-top:calc(1*var(--vh))}
 #rmiss div{background:rgba(255,30,70,.25);border:2px solid #ff3355;border-radius:12px;padding:6px 10px;text-align:center;min-width:5em}
@@ -187,37 +189,37 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #zgrid{flex:1;min-height:0;overflow-y:auto;width:min(96vw,760px);display:grid;grid-template-columns:repeat(auto-fill,minmax(min(17vw,64px),1fr));
   gap:6px;padding:4px 4px 12px;align-content:start;-webkit-overflow-scrolling:touch}
 .zc{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:min(9vw,34px);font-weight:900;
-  border-radius:12px;border:2px solid rgba(255,255,255,.12);background:rgba(0,0,0,.55);color:rgba(255,255,255,.12);font-family:inherit;padding:0}
+  border-radius:12px;border:2px solid rgba(255,255,255,.12);background:rgba(22,12,44,.58);color:rgba(255,255,255,.14);font-family:inherit;padding:0}
 .zc.got{border-color:var(--c1);color:#fff;box-shadow:0 0 10px var(--c1);cursor:pointer;text-shadow:0 0 10px var(--c0)}
 .zc.gold{border-color:#ffc83d;box-shadow:0 0 14px #ffc83d;color:#fff6d6;text-shadow:0 0 12px #ffc83d}
 .zc.gold::after{content:"★";position:absolute;right:3px;top:1px;font-size:min(3.4vw,13px);color:#ffd23d;text-shadow:0 0 6px #ffc83d}
 .zc:active{transform:scale(.92)}
 #zbtns{flex:none;display:flex;gap:10px;width:min(96vw,520px);margin:calc(1*var(--vh)) 0 max(calc(1*var(--vh)),env(safe-area-inset-bottom))}
-#zplay{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1.2*var(--vh));padding:14px}
+#zplay{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(13,8,30,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1.2*var(--vh));padding:14px}
 #zinfo{text-align:center;font-weight:900}
 #zinfo .w{font-size:min(9vw,calc(5.4*var(--vh)));text-shadow:0 0 12px var(--c0)}
 #zinfo .r{font-size:min(4.6vw,calc(2.6*var(--vh)));opacity:.9}
 #zinfo .m{font-size:min(4vw,calc(2.3*var(--vh)));margin-top:calc(.4*var(--vh))}
 #zinfo .m.gold{color:#ffe066;text-shadow:0 0 10px #ffc83d}
-#zcwrap{border-radius:20px;border:4px solid var(--c1);background:rgba(3,3,12,.95);box-shadow:0 0 30px var(--c1)}
+#zcwrap{border-radius:20px;border:4px solid var(--c1);background:rgba(12,7,28,.95);box-shadow:0 0 30px var(--c1)}
 #zcwrap.gold{border-color:#ffc83d;box-shadow:0 0 30px #ffc83d,0 0 70px #ff9d00}
 #zc{display:block;border-radius:16px}
 #zplay .cbtns{display:flex;gap:10px;width:min(90vw,420px)}
-#review{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(14,0,6,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1*var(--vh));padding:14px;cursor:pointer;text-align:center;font-weight:900}
+#review{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(24,8,30,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1*var(--vh));padding:14px;cursor:pointer;text-align:center;font-weight:900}
 #rvhead{font-size:min(5.4vw,calc(3*var(--vh)));color:#ff8aa0;text-shadow:0 0 12px #ff0040}
 #rvinfo{display:flex;align-items:center;gap:14px}
 #rvK{font-size:min(15vw,calc(8*var(--vh)));line-height:1;text-shadow:0 0 16px #ff4d6d}
 #rvinfo .t{text-align:left}
 #rvW{font-size:min(8vw,calc(4.6*var(--vh)))}
 #rvR{font-size:min(4.6vw,calc(2.6*var(--vh)));opacity:.9}
-#rvwrap{border-radius:20px;border:4px solid #ff6b84;background:rgba(3,3,12,.95);box-shadow:0 0 30px #ff2050}
+#rvwrap{border-radius:20px;border:4px solid #ff6b84;background:rgba(12,7,28,.95);box-shadow:0 0 30px #ff2050}
 #rvc{display:block;border-radius:16px}
 #rvnote{font-size:min(3.8vw,calc(2.2*var(--vh)));opacity:.85;font-weight:700}
 #rvnote b{color:#ff8aa0}
 #rvskip{font-size:min(4vw,calc(2.3*var(--vh)));opacity:.7;animation:rvblink 1.2s ease-in-out infinite}
 @keyframes rvblink{50%{opacity:.35}}
 
-#mute{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;font-size:22px;background:rgba(0,0,0,.5);
+#mute{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;font-size:22px;background:rgba(22,12,44,.55);
   border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:50%;width:44px;height:44px;cursor:pointer}
 body.playing #mute{opacity:.6;width:34px;height:34px;font-size:16px;bottom:calc(4px + env(safe-area-inset-bottom));right:8px}
 body.playing #ctrl{padding-right:44px}
@@ -235,14 +237,14 @@ body.inzukan #mute{display:none}
 
 <div id="title" class="screen">
   <div class="logo"><span class="a grad">漢字</span><span class="b glow">ブースト<i>⑤</i></span><span class="c">書き取りバトル</span></div>
-  <div class="sub glow">5年生の漢字 <span id="tN"></span>字<br>書いた画が 雷になって 敵をうつ!!</div>
+  <div class="sub glow">5年生の漢字 <span id="tN"></span>字<br>書いた画が 音符になって 敵をうつ!!</div>
   <div class="stats" id="tStats"></div>
   <div class="btns">
     <button class="btn main" id="bStart">▶ バトル開始</button>
     <button class="btn sub2" id="bWeak">🔥 苦手だけ特訓</button>
     <button class="btn sub2 zk" id="bZukan">📖 図鑑</button>
   </div>
-  <div class="hint">□の漢字が 敵の弱点 ・ 1画書くたびに 雷が落ちる<br>書き順をまちがえると 呪文が暴発するぞ!! ・ Space でスタート</div>
+  <div class="hint">□の漢字が 敵の弱点 ・ 1画書くたびに 音符が飛ぶ♪<br>書き順をまちがえると 音がはずれて ダメージ!! ・ Space でスタート</div>
 </div>
 
 <div id="game" class="screen hide">
@@ -862,12 +864,12 @@ function judgeStroke(cs, pts) {
 
 // ───────────────────────── 調整用の定数 ─────────────────────────
 const HP_MAX = 10;             // こちらの体力 (ハート)
-const MISFIRE_DMG = 1;         // 判定で弾かれた画 (呪文の暴発) で受けるダメージ
+const MISFIRE_DMG = 1;         // 判定で弾かれた画 (音はずれ = 暴発) で受けるダメージ
 const REACH_DMG = 3;           // 敵に到達されたときのダメージ
 const BOSS_REACH_DMG = 4;      // ボスに到達されたとき
 const HEAL_CLEAN = 1;          // ノーミスで倒すと回復
 const BOSS_STROKES = 15;       // この画数以上の字はボス
-const limitSec = n => 10 + 2.75 * n; // 敵がトンネルの奥から到達するまでの秒数 (n = 画数)
+const limitSec = n => 10 + 2.75 * n; // 敵がステージの奥から到達するまでの秒数 (n = 画数)
 const RAMP = .97, RAMP_MIN = .8;     // 1体倒すごとに制限時間 x RAMP (最低 RAMP_MIN 倍まで)
 const MISFIRE_PUSH = .07;      // 暴発で敵が近づく量 (制限時間の割合)
 const STROKE_PTS = 100;        // 1画ダメージの点
@@ -881,8 +883,8 @@ const SPM_MAX = 80;            // メーターの上限 (画/分)
 const SPM_WINDOW = 8;          // 画/分 を数える時間幅 (秒)。止まると速度が落ちる
 const MILESTONES = [3, 5, 10, 15, 20, 30, 50, 75, 100];
 const GEARS = [0, 3, 6];       // この COMBO (ノーミスで倒した敵の連続) でギアが上がる
-const GEAR_NAMES = ["GEAR 1 徒歩", "GEAR 2 爆走", "GEAR 3 新幹線"];
-const GOD_COMBO = 10;          // ここから金色・得点2倍
+const GEAR_NAMES = ["STAGE 1 リハーサル", "STAGE 2 本番ライブ", "STAGE 3 大合唱"];
+const GOD_COMBO = 10;          // ここから FEVER (ステージ最高潮の金色)・得点2倍
 const RANKS = [["S", 40000], ["A", 20000], ["B", 8000], ["C", 0]];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FLASH_MIN_INTERVAL = REDUCED ? 600 : 140; // ms
@@ -899,23 +901,52 @@ function hash(i, s) {
   x = Math.imul(x ^ (x >>> 13), 1274126177); x ^= x >>> 16;
   return (x & 0xFFFFFF) / 16777216;
 }
-function hsv(h, s, v) {
-  const f = (n, k = (n + h * 6) % 6) => v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
-  return [f(5), f(3), f(1)];
-}
 
-// パレット: 歩行(若草/橙/青緑) → 通常(桃/水色/黄) → 新幹線(白/青/金)
+// パレット (ステージの盛り上がり 3段階)。ティールを軸に、桜ピンク・ラベンダー・白のキラキラ
+//  リハーサル (やわらかいティール/ラベンダー/桜) → 本番ライブ (ティール/桜/ラベンダーを強く) → 大合唱 (白/ティール/桜)
+const TEAL = [.224, .773, .733], SAKURA = [1, .56, .78], LAV = [.725, .635, 1], WHITE = [1, 1, 1];
 const PAL = [
-  [[.36, 1, .35], [1, .54, .12], [.12, .96, .82]],
-  [[1, .31, .85], [.21, .9, 1], [1, .95, .23]],
-  [[1, 1, 1], [.18, .48, 1], [1, .78, .24]],
+  [[.3, .78, .74], [.68, .62, .95], [.95, .66, .82]],
+  [TEAL, SAKURA, LAV],
+  [[.92, .96, 1], [.3, .92, .86], [1, .52, .8]],
 ];
-const GOLD = [1, .78, .24], RED = [1, .2, .33];
+// GOLD = FEVER (ステージ最高潮) のスポットライトの金。RED = ダメージ・危険 (読み取りのため赤のまま)
+const GOLD = [1, .84, .42], RED = [1, .2, .33];
+// 紙吹雪と敵の色 (パステルネオン)
+const CONF = [TEAL, SAKURA, LAV, [1, .9, .55], [.55, .82, 1], WHITE, [.6, 1, .82]];
+const FOE_COLS = [TEAL, SAKURA, LAV, [.45, .75, 1], [.5, 1, .78], [1, .68, .5], [.9, .55, 1]];
+const BOSS_COLS = [[1, .35, .7], [.62, .4, 1]];
 function palAt(g, ph) {
   const c = PAL[g], x = frac(ph) * 3, i = Math.min(2, Math.floor(x)), f = x - i, a = c[i], b = c[(i + 1) % 3];
   return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
 }
 const css = (c, a = 1) => `rgba(${c[0] * 255 | 0},${c[1] * 255 | 0},${c[2] * 255 | 0},${a})`;
+// 音符・星・キラキラの形 (フォントに頼らずパスで描く)。fill はいまの fillStyle。s = 大きさ (おおよその半径)
+//  kind: 0 = キラキラ (4本の光), 1 = 星, 2 = ♪, 3 = ♫, 4 = 丸い光
+function glyph(c, kind, x, y, s, rot = 0) {
+  if (kind === 4) { c.beginPath(); c.arc(x, y, s * .45, 0, TAU); c.fill(); return; }
+  c.save(); c.translate(x, y); c.rotate(rot); c.beginPath();
+  if (kind === 0) {
+    for (let i = 0; i < 4; i++) { const a = i * TAU / 4, b = a + TAU / 8; c.lineTo(Math.cos(a) * s, Math.sin(a) * s); c.lineTo(Math.cos(b) * s * .2, Math.sin(b) * s * .2); }
+    c.closePath(); c.fill();
+  } else if (kind === 1) {
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * TAU / 10, r = i % 2 ? s * .45 : s; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+    c.closePath(); c.fill();
+  } else {
+    const hw = .34 * s, hh = .25 * s, sw = .13 * s, head = (hx, hy) => { c.beginPath(); c.ellipse(hx, hy, hw, hh, -.45, 0, TAU); c.fill(); };
+    if (kind === 2) { // ♪
+      head(-.2 * s, .6 * s);
+      c.fillRect(.06 * s, -.95 * s, sw, 1.5 * s);
+      c.beginPath(); c.moveTo(.06 * s, -.95 * s); c.bezierCurveTo(.25 * s, -.6 * s, .75 * s, -.55 * s, .5 * s, -.05 * s);
+      c.bezierCurveTo(.6 * s, -.45 * s, .3 * s, -.5 * s, .19 * s, -.62 * s); c.closePath(); c.fill();
+    } else { // ♫
+      head(-.62 * s, .66 * s); head(.42 * s, .48 * s);
+      c.fillRect(-.36 * s, -.72 * s, sw, 1.36 * s); c.fillRect(.68 * s, -.9 * s, sw, 1.36 * s);
+      c.beginPath(); c.moveTo(-.36 * s, -.72 * s); c.lineTo(.81 * s, -.9 * s); c.lineTo(.81 * s, -.62 * s); c.lineTo(-.36 * s, -.44 * s); c.closePath(); c.fill();
+    }
+  }
+  c.restore();
+}
 
 // ───────────────────────── 保存 ─────────────────────────
 // キーは旧4択版と同じ kanji5dopa.v1。stats[字] = [4択の正解, 4択のミス, ノーミスで書けた回数, 書き取りのミス画数]
@@ -1016,60 +1047,86 @@ function noise(dur, vol = .15, when = 0, freq = 0) {
   if (freq) { const f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(freq, t0); f.frequency.exponentialRampToValueAtTime(freq * .2, t0 + dur); s.connect(f); node = f; }
   node.connect(g).connect(ac.destination); s.start(t0); s.stop(t0 + dur + .03);
 }
+const PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33];
 const sfx = {
-  zap() { tone(700 + Math.random() * 2200, .03, "sawtooth", .016, .4); },
-  stroke(i) {
-    const f = 523 * 2 ** ((i % 15) / 12);
-    tone(f, .07, "square", .07); tone(f * 2, .1, "triangle", .05, 0, .03); tone(f * 3, .08, "sine", .03, 1.2, .05);
+  zap() { tone(1500 + Math.random() * 1800, .04, "sine", .012, 1.25); },            // ペン先のキラキラ
+  stroke(i) {                                                                        // 1画ごとに音階を上がる (ペンタトニック)
+    const f = 523 * 2 ** (PENTA[i % 15] / 12);
+    tone(f, .12, "triangle", .08); tone(f * 2, .16, "sine", .05, 0, .03); tone(f * 3, .1, "sine", .025, 1, .05);
   },
-  thunder() { noise(.22, .2, 0, 6000); tone(1600, .05, "square", .04, .3); tone(90, .25, "sawtooth", .09, .5, .02); },
+  thunder() { tone(2093, .22, "sine", .04); tone(3136, .2, "sine", .03, 0, .04); noise(.12, .05, 0, 9000); }, // 音符が届いたチャイム
   ok(combo, fast) {
     const f = 440 * 2 ** (Math.min(combo, 36) / 12 % 3);
-    tone(f, .08, "square", .09); tone(f * 1.5, .12, "triangle", .08, 0, .045); tone(f * 2, .2, "square", .06, 0, .1);
-    if (fast) tone(f * 2, .14, "sine", .07, 1.5, .16);
+    tone(f, .1, "triangle", .1); tone(f * 1.25, .14, "triangle", .08, 0, .05); tone(f * 1.5, .16, "triangle", .07, 0, .1); tone(f * 2, .3, "sine", .07, 0, .15);
+    if (fast) tone(f * 3, .18, "sine", .06, 1, .2);
   },
-  boom() { noise(.9, .3, 0, 2400); tone(70, .8, "sawtooth", .16, .3); tone(140, .5, "square", .07, .4, .05); },
-  ng() { tone(260, .4, "sawtooth", .13, .25); tone(140, .45, "square", .08, .5, .02); noise(.3, .12, 0, 1200); },
-  hurt() { tone(110, .5, "sawtooth", .16, .4); noise(.5, .22, 0, 900); },
+  boom() { tone(110, .35, "sine", .22, .45); noise(.9, .16, 0, 9000); tone(220, .5, "triangle", .07, 1, .05); }, // キック + シンバル
+  ng() { tone(311, .32, "triangle", .12, .8); tone(330, .32, "triangle", .1, .8); noise(.25, .08, 0, 1500); },   // 音はずれ (ぶつかる2音)
+  hurt() { tone(147, .45, "triangle", .16, .6); noise(.4, .14, 0, 900); },
   warn() { tone(70, .12, "sine", .2, .7); tone(70, .12, "sine", .15, .7, .16); },
-  spawn(boss) { tone(boss ? 60 : 140, boss ? 1.1 : .45, "sawtooth", boss ? .14 : .06, boss ? 2.5 : 3); if (boss) tone(90, 1, "square", .07, 2, .1); },
-  hint() { tone(880, .12, "triangle", .07, .7); tone(660, .16, "triangle", .06, .7, .08); },
-  heal() { [0, 7, 12].forEach((n, i) => tone(660 * 2 ** (n / 12), .14, "triangle", .07, 0, i * .06)); },
-  milestone() { [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => tone(523 * 2 ** (n / 12), .16, "square", .07, 0, i * .055)); },
-  gear() { tone(120, .7, "sawtooth", .09, 10); tone(180, .7, "square", .05, 8, .05); },
-  count(go) { tone(go ? 1046 : 523, go ? .5 : .15, "square", .1, go ? 1.01 : 0); },
-  end() { [12, 7, 4, 0].forEach((n, i) => tone(392 * 2 ** (n / 12), .2, "triangle", .1, 0, i * .09)); },
-  over() { [0, -3, -7, -12].forEach((n, i) => tone(330 * 2 ** (n / 12), .32, "sawtooth", .1, 0, i * .18)); noise(1, .2, 0, 700); },
-  fanfare() { [0, 4, 7, 12, 7, 12, 16, 24].forEach((n, i) => tone(523 * 2 ** (n / 12), .22, "square", .07, 0, i * .09)); },
+  spawn(boss) { tone(boss ? 98 : 196, boss ? 1 : .4, "triangle", boss ? .13 : .06, boss ? 2 : 2.5); if (boss) tone(147, .9, "sine", .08, 2, .1); },
+  hint() { tone(880, .14, "triangle", .07, .7); tone(660, .18, "triangle", .06, .7, .08); },
+  heal() { [0, 7, 12].forEach((n, i) => tone(660 * 2 ** (n / 12), .16, "sine", .08, 0, i * .06)); },
+  milestone() { [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => tone(523 * 2 ** (n / 12), .18, "triangle", .08, 0, i * .055)); },
+  gear() { [0, 4, 7, 12].forEach((n, i) => tone(262 * 2 ** (n / 12), .3, "triangle", .07, 2, i * .05)); },
+  count(go) { tone(go ? 1046 : 523, go ? .5 : .15, "triangle", .12, go ? 1.01 : 0); },
+  end() { [12, 7, 4, 0].forEach((n, i) => tone(392 * 2 ** (n / 12), .22, "triangle", .1, 0, i * .09)); },
+  over() { [0, -3, -7, -12].forEach((n, i) => tone(330 * 2 ** (n / 12), .34, "triangle", .11, 0, i * .18)); noise(.8, .12, 0, 700); },
+  fanfare() { [0, 4, 7, 12, 7, 12, 16, 24].forEach((n, i) => tone(523 * 2 ** (n / 12), .24, "triangle", .08, 0, i * .09)); },
 };
 const buzz = p => { if (navigator.vibrate) try { navigator.vibrate(p); } catch {} };
 
 // ───────────────────────── 演出の状態 ─────────────────────────
+// shots = 書き取りエリアから敵へ飛ぶ音符、waves = 音の波紋、bursts = 音符と星のキラキラ、conf = 紙吹雪、spots = スポットライト
 const fx = {
   t: 0, dt: 0, energy: .3, energyTarget: .3, flow: 0, hue: 0, edge: 0, gold: 0, lost: 0, danger: 0,
   needle: 0, needleVel: 0, trail: new Float32Array(14),
   gear: 1, shownGear: 1, morphAt: -99, morphFrom: 1,
   flashAt: -99, flashStr: 0, flashColor: [1, 1, 1], shakeAt: -99,
-  waves: [], bursts: [], bolts: [], cx: 0, cy: 0,
+  waves: [], bursts: [], shots: [], conf: [], spots: [], rainAt: 0, cx: 0, cy: 0,
 };
-const MORPH_SEC = .6;
+const MORPH_SEC = .6, CONF_MAX = REDUCED ? 120 : 420;
 function flash(strength, color = [1, 1, 1]) {
   if (REDUCED) strength *= .3;
   if ((fx.t - fx.flashAt) * 1000 < FLASH_MIN_INTERVAL) { if (strength > fx.flashStr) { fx.flashStr = strength; fx.flashColor = color; } return; }
   fx.flashAt = fx.t; fx.flashStr = strength; fx.flashColor = color;
 }
-function shockwave(x, y, power = 1, color = null) { fx.waves.push({ x, y, at: fx.t, p: power, c: color }); }
+// 音の波紋 (細い輪が3重に広がる)
+function shockwave(x, y, power = 1, color = null, delay = 0) { fx.waves.push({ x, y, at: fx.t + delay, p: power, c: color }); }
+// 音符と星のキラキラが弾ける
 function burst(x, y, n = 40, scale = 1, delay = 0, color = null) { fx.bursts.push({ x, y, at: fx.t + delay, seed: Math.random() * 1e5 | 0, n, s: scale, c: color }); }
 function fireworks(count) {
   for (let i = 0; i < count; i++)
-    burst(W * (.12 + .76 * Math.random()), H * (.1 + .5 * Math.random()), 44, 1 + Math.random() * .6, i * .16);
+    burst(W * (.12 + .76 * Math.random()), H * (.1 + .5 * Math.random()), 36, 1 + Math.random() * .6, i * .16);
 }
-// 雷 (書き取りエリアから敵へ)。書き取りエリアの上には描かない (drawFx で切り抜く)
-function bolt(x0, y0, x1, y1, color, w = 1, life = .3) { fx.bolts.push({ x0, y0, x1, y1, c: color, w, at: fx.t, life }); }
+// 紙吹雪: (x, y) から上へ吹き上げる。top = true なら画面の上から降らせる
+function confetti(x, y, n, power = 1, top = false) {
+  const sc = clamp(Math.min(W, H) / 500, .7, 1.6);
+  for (let i = 0; i < n && fx.conf.length < CONF_MAX; i++) {
+    const a = top ? Math.PI / 2 + (Math.random() - .5) * .8 : -Math.PI / 2 + (Math.random() - .5) * 2.4;
+    const v = (top ? 30 + Math.random() * 90 : 260 + Math.random() * 460) * power * sc;
+    fx.conf.push({ x: top ? Math.random() * W : x, y: top ? -12 - Math.random() * H * .25 : y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+      r: Math.random() * TAU, vr: (Math.random() - .5) * 9, f: Math.random() * TAU, vf: 5 + Math.random() * 8,
+      w: (5 + Math.random() * 5) * sc, h: (8 + Math.random() * 8) * sc, c: CONF[Math.random() * CONF.length | 0], t: 0, life: 2.6 + Math.random() * 1.6, star: Math.random() < .18 });
+  }
+}
+// スポットライト: 画面の上から光条が走って (x, y) に集まる
+function spotlight(x, y, n = 4, life = 1.4, colors = null) {
+  for (let i = 0; i < n; i++) {
+    const ox = W * (i + .5) / n, side = ox < x ? -1 : 1;
+    fx.spots.push({ ox, sx: x + side * W * (.35 + .2 * Math.random()), sy: y - H * .1, tx: x + (Math.random() - .5) * 30, ty: y, at: fx.t + i * .05, life,
+      c: colors ? colors[i % colors.length] : CONF[i % 3], w: .8 + .4 * Math.random() });
+  }
+}
+// 書き取りエリアから敵へ飛ぶ音符 (軌跡にキラキラ)。書き取りエリアの上には描かない (drawFx で切り抜く)。bad = 音はずれ (赤)
+function shot(x0, y0, x1, y1, color, w = 1, life = .3, bad = false) {
+  fx.shots.push({ x0, y0, x1, y1, c: color, w, at: fx.t, life, bad, bend: (Math.random() - .5) * .7, kind: Math.random() < .5 ? 2 : 3 });
+}
 function setGear(g) {
   if (g === fx.gear) return;
   fx.morphFrom = fx.gear; fx.gear = g; fx.morphAt = fx.t;
-  shockwave(W / 2, H / 2, 1.6); flash(.45);
+  shockwave(W / 2, H / 2, 1.6); flash(.4);
+  if (g > fx.morphFrom) spotlight(W / 2, H * .45, 3 + g, 1.2);
 }
 const slamEl = $("#slam");
 function slam(l1, l2 = "", mode = "go") {
@@ -1090,7 +1147,9 @@ const pad = $("#pad"), pctx = pad.getContext("2d"), padWrap = $("#padWrap"), pad
 const inkC = document.createElement("canvas"), ictx = inkC.getContext("2d");
 let W = 0, H = 0, DPR = 1, PS = 0; // PS = 書き取りエリアの一辺 (CSS px)
 const gl = bg.getContext("webgl", { antialias: false, alpha: false });
-const BG_SCALE = .5;
+// 背景の描画解像度 (画面の何倍か)。重い端末では、遅いフレームが3秒続いたら BG_SCALE_LOW に下げる
+const BG_SCALE = .5, BG_SCALE_LOW = .3;
+let bgScale = BG_SCALE, slowFor = 0;
 // 画面の高さは実際の表示領域 (innerHeight) を使う。CSS の vh は URL バーを隠した高さなので、Android Chrome のように
 // バーが見えているとはみ出して書き取りエリアが削られる。--vh を innerHeight/100 にして、CSS 側はすべてそれで組む。
 function resize() {
@@ -1099,7 +1158,7 @@ function resize() {
   document.documentElement.style.setProperty("--vh", (H / 100) + "px");
   fxc.width = foeC.width = W * DPR | 0; fxc.height = foeC.height = H * DPR | 0;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  bg.width = Math.max(1, W * DPR * BG_SCALE | 0); bg.height = Math.max(1, H * DPR * BG_SCALE | 0);
+  bg.width = Math.max(1, W * DPR * bgScale | 0); bg.height = Math.max(1, H * DPR * bgScale | 0);
   if (gl) gl.viewport(0, 0, bg.width, bg.height);
   layoutPad();
   if (!zplayEl.classList.contains("hide")) layoutZPlay();
@@ -1149,28 +1208,56 @@ function arenaMode() {
 addEventListener("resize", resize);
 if (window.visualViewport) visualViewport.addEventListener("resize", () => { if (innerHeight !== H || innerWidth !== W) resize(); });
 
-// 中央の奥へ吸い込まれるワープトンネル + プラズマ
+// 音楽ステージ: 夜空の紫 + 奥へ流れる床のグリッド + 中央の水平線のイコライザー + 上から振れるステージビーム + 客席のペンライトの光。
+// 中心 (C) は敵のいる位置。E = 盛り上がり (書く速さと COMBO)、G = FEVER (最高潮の金)、L = ダメージ・危険 (赤く沈む)
 let prog = null, U = {};
 if (gl) {
   const VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
   const FS = `precision mediump float;
-uniform vec2 R,C;uniform float T,F,Hh,E,G,L;uniform vec3 c0,c1,c2;
+uniform vec2 R,C;uniform float T,F,Hh,E,G,L;uniform vec3 c0,c1,c2;uniform vec3 Bd[6],Bc[6];
 vec3 pal(float t){float x=fract(t)*3.;vec3 c=mix(c0,c1,clamp(x,0.,1.));c=mix(c,c2,clamp(x-1.,0.,1.));return mix(c,c0,clamp(x-2.,0.,1.));}
+float h1(float n){return fract(sin(n)*43758.5453);}
 void main(){
   vec2 uv=(gl_FragCoord.xy-C)/R.x;
-  float r=length(uv)+1e-4,a=atan(uv.y,uv.x);
-  float z=.3/r+F;
-  float rings=.5+.5*sin(6.2831853*z*2.);
-  float spokes=.5+.5*sin(a*10.+6.2831853*z+T*.4);
-  float pl=sin(uv.x*9.+T*1.1)+sin(uv.y*7.-T*1.3)+sin((uv.x+uv.y)*6.+T*.7)+sin(r*14.-T*2.);
-  vec3 col=pal(Hh+z*.15+pl*.06+a/6.2831853);
-  float tun=pow(rings,3.-2.*E)*(.35+.65*spokes);
-  float k=(.16+.95*E)*tun*smoothstep(0.,.22,r)+.1*(.5+.125*pl);
-  vec3 c=col*k+pal(Hh+.5)*exp(-r*7.)*(.25+1.2*E);
-  c=mix(c,vec3(1.,.78,.24)*(k*1.3+.15),G*.55);
+  vec2 q=gl_FragCoord.xy/R.x;
+  float top=R.y/R.x;
+  float r=length(uv)+1e-4;
+  vec3 c=mix(vec3(.035,.02,.09),vec3(.1,.04,.17),smoothstep(-.5,.7,uv.y));
+  // 中央のステージの光
+  c+=pal(Hh+.5)*exp(-r*5.)*(.18+.7*E);
+  // 音の輪 (中心から外へ広がる。奥行きの動き)
+  float ring=pow(.5+.5*sin(6.2831853*(r*5.-F*2.)),8.);
+  c+=pal(Hh+r*.6)*ring*(.04+.16*E)*smoothstep(.02,.18,r)*exp(-r*1.6);
+  // 床: 遠近のグリッドが手前へ流れる
+  if(uv.y<-.004){
+    float d=.16/(-uv.y);
+    float gx=abs(fract(uv.x*d*2.5)-.5),gz=abs(fract(d*1.2-F*3.)-.5);
+    float ln=(smoothstep(.05,0.,gx)+smoothstep(.07,0.,gz))*exp(-d*.12);
+    c+=mix(c0,c1,.5+.5*sin(uv.x*3.+T*.5))*ln*(.12+.4*E);
+  }
+  // イコライザー: 水平線から上下に伸びるバー (敵の真後ろは暗く)
+  float bi=floor(uv.x*26.),bx=fract(uv.x*26.);
+  float bh=(.02+.16*E)*(.3+.7*abs(sin(bi*1.73+T*(2.2+3.*E))*sin(bi*.61-T*1.3)));
+  float ay=abs(uv.y);
+  float bar=step(bx,.72)*step(ay,bh)*step(.32,fract(ay*70.))*smoothstep(.04,.2,abs(uv.x));
+  c+=pal(Hh+bi*.035)*bar*(.22+.45*E)*(1.-ay/(bh+1e-3)*.6);
+  // ステージビーム: 上から振れる光の柱 (盛り上がるほど本数と明るさが増える)。向き (Bd.xy)・強さ (Bd.z)・色 (Bc) は JS が毎フレーム入れる
+  float cw=cos(.09+.04*E);
+  for(int i=0;i<6;i++){
+    if(Bd[i].z<.001)continue;
+    vec2 dv=q-vec2((float(i)+.5)/6.,top+.02);float l=length(dv);
+    float cone=smoothstep(cw,1.,dot(dv,Bd[i].xy)/l)*smoothstep(1.6,0.,l);
+    c+=Bc[i]*cone*Bd[i].z;
+  }
+  // 客席のペンライト / 星のまたたき
+  vec2 cell=floor(q*vec2(34.,34.));
+  float hs=h1(cell.x*17.+cell.y*131.);
+  if(hs>.965){vec2 f=fract(q*34.)-.5;float tw=.5+.5*sin(T*(2.+hs*6.)+hs*60.);c+=mix(pal(hs*3.),vec3(1.),.5)*smoothstep(.12,0.,length(f))*tw*(.35+.5*E);}
+  // FEVER: 金色の光でステージが最高潮
+  c=mix(c,c*vec3(1.15,1.,.75)+vec3(1.,.84,.42)*(.08+.25*exp(-r*3.)),G*.5);
   float y=dot(c,vec3(.3,.59,.11));
   c=mix(c,vec3(y*1.5+.12,y*.1,y*.2+.03),L);
-  c*=1.-.45*smoothstep(.35,1.,r);
+  c*=1.-.4*smoothstep(.4,1.1,r);
   gl_FragColor=vec4(c,1.);
 }`;
   const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; };
@@ -1183,19 +1270,29 @@ void main(){
     const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    for (const n of ["R", "C", "T", "F", "Hh", "E", "G", "L", "c0", "c1", "c2"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["R", "C", "T", "F", "Hh", "E", "G", "L", "c0", "c1", "c2", "Bd", "Bc"]) U[n] = gl.getUniformLocation(prog, n);
   }
 }
-if (!prog) bg.style.background = "radial-gradient(circle at 50% 45%,#ff4fd8 0,#35e6ff 25%,#000 70%)";
+if (!prog) bg.style.background = "radial-gradient(circle at 50% 42%,#39c5bb 0,#6b4fb0 30%,#1a0f2e 60%,#0d0a1f 80%)";
 
+const BEAM_D = new Float32Array(18), BEAM_C = new Float32Array(18);
 function drawBg() {
   if (!prog) return;
   const s = bg.width / W, g = PAL[fx.shownGear];
   gl.uniform2f(U.R, bg.width, bg.height);
   gl.uniform2f(U.C, fx.cx * s, bg.height - fx.cy * s);
-  gl.uniform1f(U.T, fx.t % 3600); gl.uniform1f(U.F, fx.flow); gl.uniform1f(U.Hh, fx.hue);
+  gl.uniform1f(U.T, fx.t % 600); gl.uniform1f(U.F, fx.flow); gl.uniform1f(U.Hh, fx.hue);
   gl.uniform1f(U.E, fx.energy); gl.uniform1f(U.G, fx.gold); gl.uniform1f(U.L, Math.max(fx.lost, fx.danger * .45));
   gl.uniform3fv(U.c0, g[0]); gl.uniform3fv(U.c1, g[1]); gl.uniform3fv(U.c2, g[2]);
+  // ステージビーム 6本: 振れる向き・強さ・色 (シェーダーの1画素ごとに三角関数を使わないよう、ここで計算する)
+  const T = fx.t % 600;
+  for (let i = 0; i < 6; i++) {
+    const an = Math.sin(T * (.35 + .07 * i) + i * 1.9) * .55 + (i - 2.5) * .06, on = clamp(2 + 4 * fx.energy - i, 0, 1);
+    BEAM_D[i * 3] = Math.sin(an); BEAM_D[i * 3 + 1] = -Math.cos(an); BEAM_D[i * 3 + 2] = on * (.06 + .22 * fx.energy + .25 * fx.gold);
+    const pc = palAt(fx.shownGear, fx.hue + i * .17);
+    for (let k = 0; k < 3; k++) BEAM_C[i * 3 + k] = lerp(pc[k], GOLD[k], fx.gold * .8);
+  }
+  gl.uniform3fv(U.Bd, BEAM_D); gl.uniform3fv(U.Bc, BEAM_C);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -1261,95 +1358,136 @@ function drawGauge() {
   ctx.shadowBlur = 0; ctx.font = `800 ${R * .2}px sans-serif`; ctx.fillStyle = "rgba(255,255,255,.8)";
   ctx.fillText("画/分", cx, cy + R * .62);
 }
-function jagged(x0, y0, x1, y1, amp, n) { // ギザギザの折れ線 (毎フレーム作り直してちらつかせる)
-  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, P = [[x0, y0]];
-  for (let i = 1; i < n; i++) { const t = i / n, o = (Math.random() - .5) * 2 * amp * Math.sin(Math.PI * t); P.push([x0 + dx * t + nx * o, y0 + dy * t + ny * o]); }
-  P.push([x1, y1]); return P;
+const bez = (s, u) => { // 音符の飛ぶ弧 (2次ベジェ)。制御点は中点から横へ bend ぶらす
+  const mx = (s.x0 + s.x1) / 2 - (s.y1 - s.y0) * s.bend, my = (s.y0 + s.y1) / 2 + (s.x1 - s.x0) * s.bend, v = 1 - u;
+  return [v * v * s.x0 + 2 * v * u * mx + u * u * s.x1, v * v * s.y0 + 2 * v * u * my + u * u * s.y1];
+};
+// 光条 1本 (上の光源 (ox, oy) から (x, y) へ、先の半幅 hw)。足もとに丸い光だまり
+function beam(ox, oy, x, y, hw, col, a) {
+  const g = ctx.createLinearGradient(ox, oy, x, y);
+  g.addColorStop(0, css(col, .5 * a)); g.addColorStop(.7, css(col, .2 * a)); g.addColorStop(1, css(col, .08 * a));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(ox - 5, oy); ctx.lineTo(ox + 5, oy); ctx.lineTo(x + hw, y); ctx.lineTo(x - hw, y); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, .4);
+  const pg = ctx.createRadialGradient(0, 0, 0, 0, 0, hw * 1.3);
+  pg.addColorStop(0, `rgba(255,255,255,${.3 * a})`); pg.addColorStop(.4, css(col, .22 * a)); pg.addColorStop(1, css(col, 0));
+  ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(0, 0, hw * 1.3, 0, TAU); ctx.fill(); ctx.restore();
 }
+// 輪郭を色で光らせてから白い芯 (lighter で重ねる前提)
+function glowGlyph(kind, x, y, s, rot, col, a) {
+  ctx.fillStyle = css(col, .45 * a); glyph(ctx, kind, x, y, s * 1.45, rot);
+  ctx.fillStyle = css(mixW(col, .55), a); glyph(ctx, kind, x, y, s, rot);
+}
+const mixW = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k];
 
 function drawFx() {
   ctx.clearRect(0, 0, W, H);
-  const maxR = Math.hypot(W, H) * .6, inGame = phase === "play" || phase === "count" || phase === "end";
+  const maxR = Math.hypot(W, H) * .6, inGame = phase === "play" || phase === "count" || phase === "end", dt = fx.dt, t = fx.t;
+  const padR = inGame && PS ? pad.getBoundingClientRect() : null;
+  const clipPad = () => { if (padR) { ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(padR.left - 6, padR.top - 6, padR.width + 12, padR.height + 12); ctx.clip("evenodd"); } };
   ctx.globalCompositeOperation = "lighter";
-  // 流線と雷 (書き取りエリアの上には描かない)
-  ctx.save();
-  if (inGame && PS) {
-    const r = pad.getBoundingClientRect();
-    ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(r.left - 6, r.top - 6, r.width + 12, r.height + 12); ctx.clip("evenodd");
-  }
-  const n = 18 + 140 * fx.energy | 0;
+  ctx.save(); clipPad();
+  // ステージの奥から流れてくる音符と星 (書き取りエリアの上には描かない)
+  // 図鑑の上では字を読みやすく、少なく薄く
+  const calm = phase === "zukan" ? .3 : 1, n = (phase === "zukan" ? 8 : 12 + 56 * fx.energy) | 0, gs = Math.min(W, H) / 420;
   for (let i = 0; i < n; i++) {
-    const a = hash(i, 1) * TAU, p = frac(hash(i, 2) + fx.t * (.25 + 2.4 * fx.energy) * (.5 + hash(i, 3)));
-    const r0 = p * p * maxR, len = (.02 + .3 * fx.energy) * maxR * p;
-    ctx.strokeStyle = css(fx.gold > .5 && i % 3 === 0 ? GOLD : palAt(fx.shownGear, hash(i, 4) + fx.hue), p * (.25 + .6 * fx.energy));
-    ctx.lineWidth = 1 + 3 * p * fx.energy;
-    ctx.beginPath(); ctx.moveTo(fx.cx + Math.cos(a) * r0, fx.cy + Math.sin(a) * r0);
-    ctx.lineTo(fx.cx + Math.cos(a) * (r0 + len), fx.cy + Math.sin(a) * (r0 + len)); ctx.stroke();
+    const a = hash(i, 1) * TAU, p = frac(hash(i, 2) + t * (.1 + .8 * fx.energy) * (.5 + hash(i, 3)));
+    const r0 = (.04 + p * p) * maxR, x = fx.cx + Math.cos(a) * r0, y = fx.cy + Math.sin(a) * r0;
+    const kind = i % 5 === 0 ? 2 + (i % 2) : i % 5 === 1 ? 1 : i % 5 === 2 ? 4 : 0;
+    const sz = (2.5 + 13 * p) * (.6 + .7 * hash(i, 5)) * gs * (kind >= 2 ? 1.2 : 1);
+    const al = Math.min(1, p * 4) * (1 - p) * (.35 + .6 * fx.energy) * calm;
+    const col = fx.gold > .5 && i % 3 === 0 ? GOLD : palAt(fx.shownGear, hash(i, 4) + fx.hue);
+    glowGlyph(kind, x, y, sz, kind >= 2 ? Math.sin(t * 2 + i) * .35 : t * (hash(i, 6) - .5) * 3, col, al);
   }
-  ctx.lineCap = ctx.lineJoin = "round";
-  for (let i = fx.bolts.length - 1; i >= 0; i--) {
-    const b = fx.bolts[i], a = (fx.t - b.at) / b.life;
-    if (a > 1) { fx.bolts.splice(i, 1); continue; }
-    const L = Math.hypot(b.x1 - b.x0, b.y1 - b.y0), al = 1 - a * a;
-    for (let k = 0; k < 2; k++) {
-      const P = jagged(b.x0, b.y0, b.x1, b.y1, L * .09 * b.w, 14);
-      polyline(ctx, P);
-      ctx.strokeStyle = css(b.c, .35 * al); ctx.lineWidth = 22 * b.w; ctx.stroke();
-      ctx.strokeStyle = css(b.c, .8 * al); ctx.lineWidth = 7 * b.w; ctx.stroke();
-      ctx.strokeStyle = `rgba(255,255,255,${al})`; ctx.lineWidth = 2.4 * b.w; ctx.stroke();
-      // 枝
-      const j = 3 + Math.random() * 8 | 0, q = P[j]; let x = q[0], y = q[1], an = Math.atan2(b.y1 - b.y0, b.x1 - b.x0) + (Math.random() - .5) * 2;
-      ctx.beginPath(); ctx.moveTo(x, y);
-      for (let s = 0; s < 4; s++) { an += (Math.random() - .5) * 1.2; x += Math.cos(an) * L * .06; y += Math.sin(an) * L * .06; ctx.lineTo(x, y); }
-      ctx.strokeStyle = css(b.c, .7 * al); ctx.lineWidth = 2 * b.w; ctx.stroke();
-    }
+  // FEVER: 金のスポットライトが客席を振れ続ける
+  if (fx.gold > .02 && inGame) {
+    for (let i = 0; i < 3; i++) beam(W * (.15 + .35 * i), -20, W * (.5 + .42 * Math.sin(t * (.8 + .15 * i) + i * 2.1)), H * (.55 + .2 * Math.sin(t * .7 + i)), Math.min(W, H) * .1, i === 1 ? WHITE : GOLD, .55 * fx.gold);
+  }
+  // 敵へ飛ぶ音符
+  for (let i = fx.shots.length - 1; i >= 0; i--) {
+    const b = fx.shots[i], a = (t - b.at) / b.life;
+    if (a > 1) { fx.shots.splice(i, 1); continue; }
+    const e = 1 - (1 - a) ** 2, al = a < .85 ? 1 : (1 - a) / .15, sz = Math.min(W, H) * .036 * b.w;
+    ctx.lineCap = ctx.lineJoin = "round";
+    ctx.beginPath(); for (let k = 0; k <= 14; k++) { const q = bez(b, Math.max(0, e - .4) + Math.min(e, .4) * k / 14); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
+    ctx.strokeStyle = css(b.c, .3 * al); ctx.lineWidth = sz * .55; ctx.stroke();
+    ctx.strokeStyle = `rgba(255,255,255,${.6 * al})`; ctx.lineWidth = Math.max(1.2, sz * .1); ctx.stroke();
+    for (let k = 1; k < 9; k++) { const u = e - k * .045; if (u < 0) break; const q = bez(b, u); glowGlyph(k % 3 ? 0 : 1, q[0], q[1], sz * (.55 - k * .045), t * 4 + k, b.c, al * (1 - k / 9)); }
+    const hq = bez(b, e), j = b.bad ? (Math.random() - .5) * sz * .3 : 0;
+    glowGlyph(b.kind, hq[0] + j, hq[1] + j, sz, (b.bad ? .9 * a : -.15) + Math.sin(t * 12) * .1, b.c, al);
   }
   ctx.restore();
-  // 衝撃波
+  // 音の波紋: 細い輪が3重に広がる
   for (let i = fx.waves.length - 1; i >= 0; i--) {
-    const w = fx.waves[i], a = (fx.t - w.at) / .8;
-    if (a > 1) { fx.waves.splice(i, 1); continue; }
-    const e = 1 - (1 - a) ** 3;
-    ctx.strokeStyle = css(w.c || palAt(fx.shownGear, fx.hue + a), (1 - a) * .9);
-    ctx.lineWidth = 34 * (1 - a) * w.p + 1;
-    ctx.beginPath(); ctx.arc(w.x, w.y, e * maxR * .9 * w.p, 0, TAU); ctx.stroke();
-    ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,255,255,${1 - a})`;
-    ctx.beginPath(); ctx.arc(w.x, w.y, e * maxR * .75 * w.p, 0, TAU); ctx.stroke();
+    const w = fx.waves[i], a0 = (t - w.at) / .9;
+    if (a0 > 1.3) { fx.waves.splice(i, 1); continue; }
+    for (let k = 0; k < 3; k++) {
+      const a = a0 - k * .13; if (a < 0 || a > 1) continue;
+      const e = 1 - (1 - a) ** 3, R = e * maxR * .8 * w.p + 2;
+      ctx.strokeStyle = css(w.c || palAt(fx.shownGear, fx.hue + a + k * .3), (1 - a) * (.7 - k * .15));
+      ctx.lineWidth = (14 * (1 - a) * w.p + 1) * (1 - k * .25);
+      ctx.beginPath(); ctx.arc(w.x, w.y, R, 0, TAU); ctx.stroke();
+      if (!k) { ctx.lineWidth = 2; ctx.strokeStyle = `rgba(255,255,255,${(1 - a) * .9})`; ctx.beginPath(); ctx.arc(w.x, w.y, R * .92, 0, TAU); ctx.stroke(); }
+    }
   }
-  // 花火
+  // スポットライト
+  for (let i = fx.spots.length - 1; i >= 0; i--) {
+    const sp = fx.spots[i], a = (t - sp.at) / sp.life;
+    if (a > 1) { fx.spots.splice(i, 1); continue; }
+    if (a < 0) continue;
+    const k = 1 - (1 - Math.min(1, a / .35)) ** 3, env = a < .12 ? a / .12 : 1 - ((a - .12) / .88) ** 2;
+    beam(sp.ox, -30, lerp(sp.sx, sp.tx, k), lerp(sp.sy, sp.ty, k), Math.min(W, H) * .11 * sp.w, sp.c, env);
+  }
+  // 音符と星のキラキラ
   const BURST_SEC = 1.6;
   for (let i = fx.bursts.length - 1; i >= 0; i--) {
-    const b = fx.bursts[i], age = fx.t - b.at;
+    const b = fx.bursts[i], age = t - b.at;
     if (age > BURST_SEC) { fx.bursts.splice(i, 1); continue; }
     if (age < 0) continue;
-    const k = 1 - Math.exp(-age * 4.5), al = 1 - age / BURST_SEC, base = hash(b.seed, 9);
+    const k = 1 - Math.exp(-age * 4.5), al = 1 - age / BURST_SEC, base = hash(b.seed, 9), sz0 = Math.min(W, H) * .022 * Math.sqrt(b.s);
     for (let j = 0; j < b.n; j++) {
       const an = j / b.n * TAU + hash(b.seed + j, 1) * .35, sp = (.35 + .65 * hash(b.seed + j, 2)) * Math.min(W, H) * .32 * b.s;
-      const x = b.x + Math.cos(an) * sp * k, y = b.y + Math.sin(an) * sp * k + 160 * age * age;
+      const kind = j % 7 === 0 ? 2 + (j % 2) : j % 3 === 0 ? 1 : j % 3 === 1 ? 0 : 4, note = kind >= 2;
+      const x = b.x + Math.cos(an) * sp * k, y = b.y + Math.sin(an) * sp * k + (note ? -60 * age : 120 * age * age);
       const c = b.c && j % 3 ? b.c : fx.gold > .5 && j % 2 ? GOLD : palAt(fx.shownGear, base + j / b.n * .5);
-      ctx.strokeStyle = css(c, al); ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(an) * 18 * al, y - Math.sin(an) * 18 * al); ctx.stroke();
-      ctx.fillStyle = css(c, al); ctx.beginPath(); ctx.arc(x, y, 1.5 + 3 * al, 0, TAU); ctx.fill();
+      const tw = kind === 0 ? .6 + .4 * Math.sin(age * 20 + j) : 1;
+      glowGlyph(kind, x, y, sz0 * (note ? 1.25 : kind === 4 ? .6 : .9) * (.5 + .5 * al) * tw, note ? Math.sin(age * 6 + j) * .3 : age * 3 + j, c, al);
     }
   }
   ctx.globalCompositeOperation = "source-over";
+  // 紙吹雪 (書いている最中は書き取りエリアの上に描かない)
+  if (fx.gold > .5 && phase === "play" && t - fx.rainAt > .14) { fx.rainAt = t; confetti(0, 0, 2, .6, true); }
+  if (fx.conf.length) {
+    ctx.save(); if (C && !C.locked) clipPad();
+    const gv = H * .5;
+    for (let i = fx.conf.length - 1; i >= 0; i--) {
+      const q = fx.conf[i]; q.t += dt;
+      if (q.t > q.life || q.y > H + 40) { fx.conf.splice(i, 1); continue; }
+      q.vy += gv * dt; q.vx *= 1 - 1.8 * dt; q.vy *= 1 - 1.5 * dt;
+      q.x += (q.vx + Math.sin(q.f) * 40) * dt; q.y += q.vy * dt; q.f += q.vf * dt; q.r += q.vr * dt;
+      const al = Math.min(1, (q.life - q.t) * 1.5);
+      ctx.fillStyle = css(q.c, al);
+      if (q.star) glyph(ctx, 1, q.x, q.y, q.w, q.r);
+      else { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.r); ctx.scale(1, Math.cos(q.f)); ctx.fillRect(-q.w / 2, -q.h / 2, q.w, q.h); ctx.restore(); }
+    }
+    ctx.restore();
+  }
   // 縁 + メーター
   drawEdge(inGame && E ? (E.state === "come" ? clamp(1 - E.prog, 0, 1) : E.state === "dead" ? 1 : 0) : 1);
   if (inGame) drawGauge();
   // ダメージ・危険の赤い縁取り
-  const red = Math.max(fx.lost, fx.danger * (.35 + .25 * Math.sin(fx.t * 9)));
+  const red = Math.max(fx.lost, fx.danger * (.35 + .25 * Math.sin(t * 9)));
   if (red > .02) {
     const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.hypot(W, H) * .6);
     g.addColorStop(0, "rgba(255,0,40,0)"); g.addColorStop(1, `rgba(255,0,40,${.7 * red})`);
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
   // 全画面の明滅
-  const fa = fx.flashStr * Math.exp(-(fx.t - fx.flashAt) * 7);
+  const fa = fx.flashStr * Math.exp(-(t - fx.flashAt) * 7);
   if (fa > .01) { ctx.fillStyle = css(fx.flashColor, fa); ctx.fillRect(0, 0, W, H); }
 }
 
 // ───────────────────────── 敵 ─────────────────────────
-// トンネルの奥 (札の下) から迫ってくる、角と光る目の影。#foe (書き取りエリアより下の層) に描くので、近づいても書き取りエリアは隠れない。
+// ステージの奥 (札の下) から迫ってくる「ノイズ」(音符の触角と光る目の、歌をじゃまするおばけ)。#foe (書き取りエリアより下の層) に描くので、近づいても書き取りエリアは隠れない。
 let E = null;
 const promptEl = $("#prompt");
 // 敵の入る箱: ふつうは札の下 (ティッカーの行まで)。arena.side のときは札の右。
@@ -1380,8 +1518,8 @@ function makeShards() {
     E.shards.push({ dx: 0, dy: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - .6, r: Math.random() * TAU, vr: (Math.random() - .5) * 12, s: .08 + Math.random() * .16 });
   }
 }
-function foeBody(c, u, t, col, boss) {
-  // 体: 頭・肩・ぼろぼろの裾
+function foeBody(c, u, t, col, boss, glitch = false) {
+  // 体: 頭・肩・ふわふわ揺れる裾
   const K = boss ? 9 : 7;
   c.beginPath();
   c.moveTo(0, -.95 * u);
@@ -1392,7 +1530,7 @@ function foeBody(c, u, t, col, boss) {
   c.lineTo(.9 * u, .85 * u);
   for (let i = 0; i <= K; i++) {
     const x = .9 - 1.8 * i / K, w = Math.sin(t * 3 + i * 1.7) * .06;
-    c.lineTo(x * u, (i % 2 ? .62 + w : 1.02 + w) * u);
+    c.lineTo(x * u, (i % 2 ? .66 + w : 1.0 + w) * u);
   }
   c.lineTo(-1.0 * u, .4 * u);
   c.quadraticCurveTo(-1.08 * u, .1 * u, -.92 * u, -.1 * u);
@@ -1401,21 +1539,24 @@ function foeBody(c, u, t, col, boss) {
   c.quadraticCurveTo(-.3 * u, -.98 * u, 0, -.95 * u);
   c.closePath();
   const g = c.createLinearGradient(0, -u, 0, u);
-  g.addColorStop(0, css([col[0] * .32, col[1] * .32, col[2] * .32], .97));
-  g.addColorStop(.55, "rgba(6,3,14,.97)"); g.addColorStop(1, "rgba(0,0,0,.6)");
+  g.addColorStop(0, css([col[0] * .4, col[1] * .35, col[2] * .45], .97));
+  g.addColorStop(.55, "rgba(20,9,38,.97)"); g.addColorStop(1, "rgba(12,6,26,.6)");
   c.fillStyle = g; c.shadowColor = css(col); c.shadowBlur = u * .5; c.fill();
   c.shadowBlur = 0; c.strokeStyle = css(col, .9); c.lineWidth = Math.max(1.5, u * .035); c.stroke();
+  if (glitch) { // 体の中を走るノイズの横線 (毎フレーム位置が変わる)
+    c.save(); c.clip(); c.fillStyle = css(col, .22);
+    for (let i = 0; i < 4; i++) { const y = (Math.random() * 1.9 - .9) * u; c.fillRect((Math.random() - 1) * u, y, (.6 + Math.random()) * u, u * (.02 + .04 * Math.random())); }
+    c.restore();
+  }
 }
-function foeHorn(c, u, sx, big, col) { // sx = ±1
-  const h = big ? 1.55 : 1.38;
-  c.beginPath();
-  c.moveTo(sx * .17 * u, -.84 * u);
-  c.quadraticCurveTo(sx * .42 * u, -1.0 * u, sx * .66 * u, -h * u);
-  c.quadraticCurveTo(sx * .5 * u, -1.02 * u, sx * .38 * u, -.7 * u);
-  c.closePath();
-  const g = c.createLinearGradient(0, -h * u, 0, -.7 * u);
-  g.addColorStop(0, "#fff"); g.addColorStop(.35, css(col)); g.addColorStop(1, css([col[0] * .3, col[1] * .3, col[2] * .3]));
-  c.fillStyle = g; c.shadowColor = css(col); c.shadowBlur = u * .25; c.fill(); c.shadowBlur = 0;
+// 頭から生えた音符の触角 (sx = ±1)
+function foeAntenna(c, u, sx, big, col) {
+  const h = big ? 1.5 : 1.36, tx = sx * .56 * u, ty = -h * u;
+  c.strokeStyle = css(col); c.lineWidth = Math.max(2, u * .055); c.lineCap = "round";
+  c.shadowColor = css(col); c.shadowBlur = u * .2;
+  c.beginPath(); c.moveTo(sx * .2 * u, -.86 * u); c.quadraticCurveTo(sx * .22 * u, -1.15 * u, tx, ty); c.stroke();
+  c.fillStyle = css(mixW(col, .45)); glyph(c, 2, tx + sx * .05 * u, ty - .05 * u, u * .26, sx * .25);
+  c.shadowBlur = 0;
 }
 function foeEye(c, u, ex, ey, sx, col, open) {
   c.save(); c.translate(ex * u, ey * u); c.rotate(sx * .38);
@@ -1433,20 +1574,20 @@ function drawFoe() {
   if (E.state === "dead") { const a = (t - E.endAt) / .7; if (a > 1) { drawShards(c, x, y, u, col, a); return; } alpha = 1 - a; sc = 1 + .7 * a; }
   if (E.state === "reach") { const a = Math.min(1, (t - E.endAt) / .55); alpha = 1 - a * a; sc = 1 + 1.3 * a; oy = u * 1.2 * a; }
   if (E.state === "come" && E.prog > .8) { const k = (E.prog - .8) * 5 * u * .05; ox = (Math.random() - .5) * k; oy += (Math.random() - .5) * k; }
-  // 札 (熟語と読み) から敵へ鎖: 熟語を背負っている
+  // 札 (熟語と読み) から敵へ五線譜のリボン: 熟語を背負っている。線の上を音符が流れる
   if (E.state === "come") {
     const pr = g.pr;
-    c.save(); c.setLineDash([u * .12, u * .08]); c.lineWidth = Math.max(2, u * .035); c.strokeStyle = css(col, .7);
-    c.shadowColor = css(col); c.shadowBlur = 8;
+    c.save(); c.lineWidth = Math.max(1, u * .016); c.strokeStyle = css(col, .65); c.shadowColor = css(col); c.shadowBlur = 6;
     for (const sx of [-1, 1]) {
       const ex = x + sx * u * .62, ey = y - u * 1.3;
-      if (g.side) { // 札の右の縁から
-        const sy = lerp(pr.top, pr.bottom, sx < 0 ? .3 : .75);
-        c.beginPath(); c.moveTo(pr.right - 3, sy); c.quadraticCurveTo((pr.right + ex) / 2, Math.max(sy, ey) + u * .3, ex, ey); c.stroke();
-      } else {
-        c.beginPath(); c.moveTo(lerp(pr.left, pr.right, sx < 0 ? .2 : .8), pr.bottom - 3);
-        c.quadraticCurveTo(x + sx * u * .8, (pr.bottom + y - u) / 2 + u * .2, ex, ey); c.stroke();
-      }
+      let p0, p1;
+      if (g.side) { const sy = lerp(pr.top, pr.bottom, sx < 0 ? .3 : .75); p0 = [pr.right - 3, sy]; p1 = [(pr.right + ex) / 2, Math.max(sy, ey) + u * .3]; }
+      else { p0 = [lerp(pr.left, pr.right, sx < 0 ? .2 : .8), pr.bottom - 3]; p1 = [x + sx * u * .8, (pr.bottom + y - u) / 2 + u * .2]; }
+      const sp = Math.max(2, u * .045);
+      for (let L = -2; L <= 2; L++) { c.beginPath(); c.moveTo(p0[0] + L * sp, p0[1]); c.quadraticCurveTo(p1[0] + L * sp, p1[1], ex + L * sp, ey); c.stroke(); }
+      const k = frac(t * .7 + (sx > 0 ? .5 : 0)), v = 1 - k;
+      const nx = v * v * p0[0] + 2 * v * k * p1[0] + k * k * ex, ny = v * v * p0[1] + 2 * v * k * p1[1] + k * k * ey;
+      c.fillStyle = css(mixW(col, .5)); glyph(c, 2 + (sx > 0 ? 1 : 0), nx, ny, Math.max(5, u * .14), 0);
     }
     c.restore();
   }
@@ -1456,9 +1597,9 @@ function drawFoe() {
   const pulse = .5 + .5 * Math.sin(t * (4 + 6 * E.prog));
   ag.addColorStop(0, css(col, .38 + .2 * pulse)); ag.addColorStop(1, css(col, 0));
   c.fillStyle = ag; c.beginPath(); c.arc(0, 0, u * (boss ? 2.1 : 1.6), 0, TAU); c.fill();
-  if (boss) { foeHorn(c, u * .8, -1, false, GOLD); foeHorn(c, u * .8, 1, false, GOLD); }
-  foeHorn(c, u, -1, boss, col); foeHorn(c, u, 1, boss, col);
-  foeBody(c, u, t, col, boss);
+  if (boss) { foeAntenna(c, u * .8, -1, false, GOLD); foeAntenna(c, u * .8, 1, false, GOLD); }
+  foeAntenna(c, u, -1, boss, col); foeAntenna(c, u, 1, boss, col);
+  foeBody(c, u, t, col, boss, true);
   if (boss) { // 王冠のような光るトゲ
     c.fillStyle = css(GOLD); c.shadowColor = css(GOLD); c.shadowBlur = u * .3;
     c.beginPath(); c.moveTo(-.22 * u, -.9 * u);
@@ -1469,12 +1610,12 @@ function drawFoe() {
   const blink = frac(t * .33 + E.seed * .01) < .04 ? .1 : 1, open = blink * (.8 + .5 * E.prog);
   foeEye(c, u, -.19, -.52, 1, col, open); foeEye(c, u, .19, -.52, -1, col, open);
   if (boss) foeEye(c, u * .7, 0, -.98, 0, RED, open);
-  // 口: ギザギザの光る歯
+  // 口: 不協和音の波形 (近いほど大きく揺れる)
   const mo = .3 + .7 * E.prog;
-  c.beginPath(); c.moveTo(-.22 * u, -.3 * u);
-  for (let i = 1; i <= 8; i++) c.lineTo((-.22 + .44 * i / 8) * u, (-.3 + (i % 2 ? .09 * mo : 0)) * u);
+  c.beginPath(); c.moveTo(-.24 * u, -.3 * u);
+  for (let i = 1; i <= 14; i++) c.lineTo((-.24 + .48 * i / 14) * u, (-.3 + Math.sin(i * 1.5 + t * 14) * .05 * mo * Math.sin(Math.PI * i / 14)) * u);
   c.strokeStyle = css(col, .9); c.lineWidth = Math.max(1.5, u * .03); c.shadowColor = css(col); c.shadowBlur = u * .2; c.stroke(); c.shadowBlur = 0;
-  // 雷を受けた: 白く光る
+  // 音符を受けた: 白く光る
   const hk = Math.max(0, 1 - (t - E.hitAt) / .22);
   if (hk > 0) {
     c.globalCompositeOperation = "lighter"; c.globalAlpha = alpha * hk;
@@ -1485,17 +1626,16 @@ function drawFoe() {
   c.restore();
   if (E.state === "dead") drawShards(c, x, y, u, col, (t - E.endAt) / .7);
 }
-function drawShards(c, x, y, u, col, a) {
+function drawShards(c, x, y, u, col, a) { // 撃破: 体が音符と星になって弾ける
   if (!E.shards || a > 1.8) return;
   const al = clamp(1 - a / 1.8, 0, 1), k = 1 - Math.exp(-a * 3);
   c.save(); c.globalCompositeOperation = "lighter";
-  for (const s of E.shards) {
-    const px = x + s.vx * u * k * 1.6, py = y + s.vy * u * k * 1.6 + u * a * a * .8, r = s.r + s.vr * a, z = s.s * u;
-    c.save(); c.translate(px, py); c.rotate(r);
-    c.fillStyle = css(col, al); c.shadowColor = css(col); c.shadowBlur = 10;
-    c.beginPath(); c.moveTo(0, -z); c.lineTo(z * .7, z * .6); c.lineTo(-z * .6, z * .4); c.closePath(); c.fill();
-    c.restore();
-  }
+  E.shards.forEach((s, i) => {
+    const px = x + s.vx * u * k * 1.6, py = y + s.vy * u * k * 1.6 + u * a * a * (i % 3 ? .8 : -.3), r = i % 3 ? s.r + s.vr * a : Math.sin(a * 5 + i) * .3, z = s.s * u * 1.3;
+    const cc = i % 3 === 0 ? col : i % 3 === 1 ? WHITE : CONF[i % CONF.length];
+    c.fillStyle = css(cc, al * .45); glyph(c, i % 3 ? (i % 2 ? 1 : 0) : 2 + (i % 2), px, py, z * 1.4, r);
+    c.fillStyle = css(mixW(cc, .5), al); glyph(c, i % 3 ? (i % 2 ? 1 : 0) : 2 + (i % 2), px, py, z, r);
+  });
   c.restore();
 }
 function foeScreenPos() { const g = foeGeom(), p = foePos(g); return [p.x, p.y - p.u * .35, p.u]; }
@@ -1534,10 +1674,12 @@ function renderInk() { // 確定した画をキャッシュに描く
   }
 }
 function polyline(c, P) { c.beginPath(); c.moveTo(P[0][0], P[0][1]); for (let i = 1; i < P.length; i++) c.lineTo(P[i][0], P[i][1]); }
-function addSparks(x, y, n, color, speed = 1, life = .45) {
+// 書き取りエリアの粒。kind: -1 = 火花の線、0 = キラキラ、1 = 星、2/3 = 音符 (音符はふわっと上へ浮く)
+function addSparks(x, y, n, color, speed = 1, life = .45, kind = 0) {
   for (let i = 0; i < n && PAD.sparks.length < 500; i++) {
     const a = Math.random() * TAU, v = (60 + Math.random() * 260) * speed * PS / 400;
-    PAD.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, life: life * (.5 + Math.random() * .7), c: color });
+    PAD.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, life: life * (.5 + Math.random() * .7), c: color, k: kind,
+      z: PS * (kind >= 2 ? .032 + .018 * Math.random() : .011 + .012 * Math.random()), r: Math.random() * TAU });
   }
 }
 function drawPad() {
@@ -1575,10 +1717,10 @@ function drawPad() {
     strokePathScaled(c, C.paths[PAD.accIdx], INK_W * (1 + 1.6 * (1 - aa)), css(palAt(fx.shownGear, fx.hue), 1 - aa), S * .05, "#fff");
     c.globalCompositeOperation = "source-over";
   }
-  const da = (t - PAD.doneAt) / .9; // 1字完成: 金色に脈打つ
+  const da = (t - PAD.doneAt) / .9; // 1字完成: 金と桜色に脈打つ
   if (da < 1) {
     c.globalCompositeOperation = "lighter";
-    for (let i = 0; i < n; i++) strokePathScaled(c, C.paths[i], INK_W * (1 + .8 * (1 - da)), css(GOLD, (1 - da) * .9), S * .06, css(GOLD));
+    for (let i = 0; i < n; i++) { const cc = i % 2 ? SAKURA : GOLD; strokePathScaled(c, C.paths[i], INK_W * (1 + .8 * (1 - da)), css(cc, (1 - da) * .9), S * .06, css(cc)); }
     c.globalCompositeOperation = "source-over";
   }
   // まちがえた画: 赤く震えて弾ける
@@ -1592,33 +1734,19 @@ function drawPad() {
     f.pts.forEach((p, q) => { const x = p[0] + (Math.random() - .5) * j, y = p[1] + (Math.random() - .5) * j; q ? c.lineTo(x, y) : c.moveTo(x, y); });
     c.stroke(); c.shadowBlur = 0;
   }
-  // 書いている画: 雷の軌跡
+  // 書いている画: 光のリボン + 軌跡に瞬くキラキラ
   const d = PAD.drawing;
   if (d && d.pts.length) {
     const P = d.pts, c0 = palAt(fx.shownGear, fx.hue), c1 = palAt(fx.shownGear, fx.hue + .33), c2 = palAt(fx.shownGear, fx.hue + .66);
     c.lineCap = c.lineJoin = "round";
     c.globalCompositeOperation = "lighter";
     if (P.length > 1) {
-      polyline(c, P); c.strokeStyle = css(c0, .28); c.lineWidth = S * .085; c.stroke();
-      c.strokeStyle = css(c1, .5); c.lineWidth = S * .045; c.stroke();
-      for (let a = 0; a < 3; a++) { // 電気のギザギザ
-        const amp = S * (.012 + .012 * a);
-        c.beginPath();
-        for (let i = 0; i < P.length; i += 2) {
-          const x = P[i][0] + (Math.random() - .5) * amp * 2, y = P[i][1] + (Math.random() - .5) * amp * 2;
-          i ? c.lineTo(x, y) : c.moveTo(x, y);
-        }
-        c.strokeStyle = css(a === 1 ? c2 : [1, 1, 1], .75 - a * .15); c.lineWidth = 1.6; c.stroke();
-      }
-      // ペン先から枝分かれする稲妻
-      const tip = P[P.length - 1], back = P[Math.max(0, P.length - 6)];
-      const ang0 = Math.atan2(tip[1] - back[1], tip[0] - back[0]);
-      for (let b = 0; b < 2; b++) {
-        if (Math.random() < .35) continue;
-        let x = tip[0], y = tip[1], an = ang0 + Math.PI + (Math.random() - .5) * 2.6;
-        c.beginPath(); c.moveTo(x, y);
-        for (let q = 0; q < 4; q++) { an += (Math.random() - .5) * 1.4; const l = S * (.025 + .03 * Math.random()); x += Math.cos(an) * l; y += Math.sin(an) * l; c.lineTo(x, y); }
-        c.strokeStyle = css(b ? c2 : c1, .85); c.lineWidth = 1.3; c.stroke();
+      polyline(c, P); c.strokeStyle = css(c0, .24); c.lineWidth = S * .085; c.stroke();
+      c.strokeStyle = css(c1, .42); c.lineWidth = S * .045; c.stroke();
+      for (let i = P.length - 1, m = 0; i >= 0 && m < 16; i -= 4, m++) {
+        const tw = .5 + .5 * Math.sin(t * 16 + i * .9), off = S * .03 * Math.sin(i * 2.3);
+        c.fillStyle = css(m % 2 ? c2 : WHITE, (1 - m / 16) * .9 * tw);
+        glyph(c, m % 5 === 4 ? 1 : 0, P[i][0] + off, P[i][1] - off, S * (.012 + .014 * tw), t * 3 + i);
       }
     }
     c.globalCompositeOperation = "source-over";
@@ -1628,16 +1756,18 @@ function drawPad() {
     c.globalCompositeOperation = "lighter"; c.fillStyle = g; c.beginPath(); c.arc(e[0], e[1], S * .07, 0, TAU); c.fill();
     c.globalCompositeOperation = "source-over";
   }
-  // 火花
+  // 粒 (キラキラ・星・音符・火花)
   if (PAD.sparks.length) {
     c.globalCompositeOperation = "lighter"; c.lineCap = "round";
     for (let i = PAD.sparks.length - 1; i >= 0; i--) {
       const s = PAD.sparks[i]; s.t += dt;
       if (s.t > s.life) { PAD.sparks.splice(i, 1); continue; }
-      s.x += s.vx * dt; s.y += s.vy * dt; s.vx *= .9; s.vy = s.vy * .9 + 300 * dt * PS / 400;
+      const note = s.k >= 2;
+      s.x += s.vx * dt; s.y += s.vy * dt; s.vx *= .9; s.vy = s.vy * .9 + (note ? -160 : s.k < 0 ? 300 : 90) * dt * PS / 400;
       const al = 1 - s.t / s.life;
-      c.strokeStyle = css(s.c, al); c.lineWidth = 2;
-      c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - s.vx * .04, s.y - s.vy * .04); c.stroke();
+      if (s.k < 0) { c.strokeStyle = css(s.c, al); c.lineWidth = 2; c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - s.vx * .04, s.y - s.vy * .04); c.stroke(); continue; }
+      c.fillStyle = css(s.c, al * .4); glyph(c, s.k, s.x, s.y, s.z * 1.5, note ? Math.sin(s.t * 8) * .3 : s.r + s.t * 6);
+      c.fillStyle = css(mixW(s.c, .5), al); glyph(c, s.k, s.x, s.y, s.z, note ? Math.sin(s.t * 8) * .3 : s.r + s.t * 6);
     }
     c.globalCompositeOperation = "source-over";
   }
@@ -1661,7 +1791,7 @@ pad.addEventListener("pointermove", e => {
     if (Math.hypot(p[0] - q[0], p[1] - q[1]) >= .75) d.pts.push(p);
   }
   const tip = d.pts[d.pts.length - 1];
-  addSparks(tip[0], tip[1], 2, Math.random() < .5 ? [1, 1, 1] : palAt(fx.shownGear, fx.hue + Math.random()), .8, .3);
+  addSparks(tip[0], tip[1], 1, Math.random() < .5 ? WHITE : palAt(fx.shownGear, fx.hue + Math.random()), .5, .4, Math.random() < .2 ? 1 : 0);
   if (fx.t - PAD.lastZap > .07) { PAD.lastZap = fx.t; sfx.zap(); }
 });
 const endPointer = commit => e => { const d = PAD.drawing; if (d && e.pointerId === d.id) endStroke(commit); };
@@ -1689,7 +1819,7 @@ function loop(ms) {
   if (phase === "play" || phase === "end") {
     while (G.hits.length && fx.t - G.hits[0] > SPM_WINDOW) G.hits.shift();
     spm = G.hits.length * 60 / SPM_WINDOW; G.maxSpm = Math.max(G.maxSpm, spm);
-    // 止まると速度が落ちる (最後の画から 2.5 秒を過ぎると、だんだんトンネルが遅くなる)
+    // 止まると速度が落ちる (最後の画から 2.5 秒を過ぎると、だんだんステージの流れが落ち着く)
     const idle = clamp(1 - (fx.t - G.lastHitAt - 2.5) / 5, .2, 1);
     fx.energyTarget = clamp((.12 + .5 * Math.min(1, G.combo / GOD_COMBO) + .38 * Math.min(1, spm / SPM_MAX)) * idle, 0, 1);
     G.shown += (G.score - G.shown) * (1 - Math.exp(-12 * fx.dt));
@@ -1733,13 +1863,17 @@ function loop(ms) {
     rootStyle.setProperty("--c1", css(g ? [1, 1, 1] : palAt(fx.shownGear, fx.hue + .33)));
     rootStyle.setProperty("--c2", css(g ? GOLD : palAt(fx.shownGear, fx.hue + .66)));
   }
-  if ((phase === "title" || phase === "zukan") && fx.t - titleBurstAt > 1.3) { titleBurstAt = fx.t; burst(W * (.15 + .7 * Math.random()), H * (.1 + .35 * Math.random()), 36, .9); }
+  if (phase === "title" && fx.t - titleBurstAt > 1.3) { titleBurstAt = fx.t; burst(W * (.15 + .7 * Math.random()), H * (.1 + .35 * Math.random()), 36, .9); }
 
   if ((phase === "play" || phase === "count" || phase === "end") && PS) {
     if (E) { const g = foeGeom(); fx.cx = g.fx0; fx.cy = g.fy0; }
     drawPad();
   } else { fx.cx = W / 2; fx.cy = H * .4; }
   drawBg(); drawFoe(); drawFx();
+  if (bgScale > BG_SCALE_LOW) { // 重い端末: 背景だけ粗くして書き取りの手ごたえを守る
+    slowFor = fx.dt > 1 / 36 ? slowFor + fx.dt : Math.max(0, slowFor - fx.dt);
+    if (slowFor > 3) { bgScale = BG_SCALE_LOW; resize(); }
+  }
   if (!zplayEl.classList.contains("hide")) drawZPlay();
   if (RV.on) drawReview();
   requestAnimationFrame(loop);
@@ -1815,7 +1949,7 @@ function start(weak) {
         lastHitAt: fx.t, endedBy: "" };
   fx.gear = 0; fx.morphFrom = 0; fx.morphAt = -99;
   comboV.textContent = "0"; multV.textContent = "×1.0"; scoreV.textContent = "0"; ticker.textContent = ""; statusEl.textContent = "";
-  PAD.fails.length = 0; PAD.sparks.length = 0; PAD.drawing = null; fx.bolts.length = 0;
+  PAD.fails.length = 0; PAD.sparks.length = 0; PAD.drawing = null; fx.shots.length = 0; fx.conf.length = 0; fx.spots.length = 0;
   renderHp();
   phase = "count"; show("game");
   next(); C.locked = true;
@@ -1823,7 +1957,7 @@ function start(weak) {
   steps.forEach((s, i) => setTimeout(() => { if (phase === "count") { slam(s, "", "quick"); sfx.count(false); shockwave(W / 2, H / 2, .6); } }, i * 550));
   setTimeout(() => {
     if (phase !== "count") return;
-    slam("FIGHT!!", weak ? "苦手特訓バトル" : "□の漢字が 敵の弱点だ!!"); sfx.count(true); flash(.6); shockwave(W / 2, H / 2, 1.4); fireworks(4);
+    slam("LIVE START!!", weak ? "苦手特訓ライブ" : "□の漢字が 敵の弱点だ!!"); sfx.count(true); flash(.5); shockwave(W / 2, H / 2, 1.4); fireworks(4); spotlight(W / 2, H * .4, 4, 1.3);
     phase = "play"; C.locked = false; C.at = fx.t; G.lastHitAt = fx.t;
     if (E.boss) setTimeout(announceBoss, 900);
   }, steps.length * 550);
@@ -1845,8 +1979,7 @@ function pickItem() {
 }
 function spawnEnemy(item) {
   const n = item.ds.length, boss = n >= BOSS_STROKES, idx = DATA.indexOf(item);
-  const h = boss ? lerp(.93, 1.08, hash(idx, 5)) % 1 : frac(hash(idx, 11) + G.qCount * .382);
-  const col = hsv(h, boss ? .95 : .75 + .25 * hash(idx, 3), 1);
+  const col = boss ? BOSS_COLS[hash(idx, 5) * BOSS_COLS.length | 0] : FOE_COLS[(hash(idx, 11) * FOE_COLS.length + G.qCount) % FOE_COLS.length | 0];
   E = { item, n, hp: n, boss, col, seed: Math.random() * 1000, prog: 0, endProg: 0, limit: limitSec(n) * G.ramp, state: "come", at: fx.t, hitAt: -9, endAt: -9, shards: null };
   rootStyle.setProperty("--fc", css(col));
   promptEl.classList.toggle("boss", boss);
@@ -1858,7 +1991,7 @@ function spawnEnemy(item) {
 function announceBoss() {
   if (phase !== "play" || !E || !E.boss) return;
   slam("BOSS 出現!!", `${E.n}画の強敵 ・ 弱点「${E.item.w.replace(E.item.k, "□")}」`, "go red");
-  flash(.55, RED); shockwave(fx.cx, fx.cy, 1.8, RED); fx.shakeAt = fx.t; buzz([60, 40, 60, 40, 120]);
+  flash(.55, RED); shockwave(fx.cx, fx.cy, 1.8, RED); spotlight(fx.cx, fx.cy, 4, 1.4, [RED, BOSS_COLS[1], GOLD]); fx.shakeAt = fx.t; buzz([60, 40, 60, 40, 120]);
 }
 function updateFoeBar(hitIdx = -1) {
   [...foeBar.children].forEach((s, i) => {
@@ -1896,7 +2029,7 @@ function updateStatus() {
 }
 const toScreen = (d, p) => [d.r.left + p[0] * d.r.width / 109, d.r.top + p[1] * d.r.height / 109];
 
-// 正しい画 → 雷が敵に落ちて体力が1減る
+// 正しい画 → 音符とキラキラが弾け、音符が敵へ飛んで体力が1減る
 function strokeOk(k, d, pts, ms) {
   const n = C.paths.length, R = C.refPts[k];
   C.streak = 0; C.hint = false;
@@ -1905,43 +2038,44 @@ function strokeOk(k, d, pts, ms) {
   PAD.accAt = fx.t; PAD.accIdx = k;
   renderInk(); flashClass(padWrap, "hit");
   const S = PS / 109;
-  for (let i = 0; i < R.length; i += 4) addSparks(R[i][0] * S, R[i][1] * S, 2, i % 8 ? [1, 1, 1] : palAt(fx.shownGear, fx.hue + i / R.length), 1.2, .5);
-  const e = toScreen(d, R[R.length - 1]);
-  shockwave(e[0], e[1], .2);
-  // 雷
+  for (let i = 0; i < R.length; i += 4) addSparks(R[i][0] * S, R[i][1] * S, 2, i % 8 ? WHITE : palAt(fx.shownGear, fx.hue + i / R.length), 1.1, .6, i % 12 ? 0 : 1);
+  const ep = R[R.length - 1], e = toScreen(d, ep);
+  addSparks(ep[0] * S, ep[1] * S, 3, palAt(fx.shownGear, fx.hue + .2), .7, .9, 2); addSparks(ep[0] * S, ep[1] * S, 1, SAKURA, .6, .9, 3);
+  shockwave(e[0], e[1], .3); shockwave(e[0], e[1], .22, SAKURA, .08);
+  // 音符が敵へ
   E.hp = Math.max(0, E.hp - 1); E.hitAt = fx.t; G.dmg++;
   const pts1 = Math.round(STROKE_PTS * comboMult(G.combo) * godK()); G.score += pts1;
   const [fxp, fyp, fu] = foeScreenPos(), bc = fx.gold > .5 ? GOLD : palAt(fx.shownGear, fx.hue + .5);
-  bolt(e[0], e[1], fxp, fyp, bc, 1, .32);
-  bolt(e[0], e[1], fxp + (Math.random() - .5) * fu * .6, fyp + (Math.random() - .5) * fu * .4, [1, 1, 1], .5, .22);
-  burst(fxp, fyp, 18, .35, 0, E.col); shockwave(fxp, fyp, .3, E.col);
-  popText(fxp + (Math.random() - .5) * fu * .8, fyp - fu * .2, "-1", "dmg");
+  shot(e[0], e[1], fxp, fyp, bc, 1, .3);
+  shot(e[0], e[1], fxp + (Math.random() - .5) * fu * .6, fyp + (Math.random() - .5) * fu * .4, WHITE, .65, .26);
+  burst(fxp, fyp, 18, .35, .24, E.col); shockwave(fxp, fyp, .3, E.col, .24);
+  setTimeout(() => popText(fxp + (Math.random() - .5) * fu * .8, fyp - fu * .2, "-1", "dmg"), 230);
   updateFoeBar(E.hp);
   sfx.stroke(k); sfx.thunder(); buzz(8);
   updateStatus();
   if (C.cs.k >= n) charDone();
 }
-// 弾かれた画 → 呪文の暴発: こちらがダメージを受け、敵が少し近づく
+// 弾かれた画 → 音はずれ (暴発): こちらがダメージを受け、敵が少し近づく
 function strokeMiss(reason, d) {
   C.miss++; C.streak++; G.missStrokes++;
   st(C.item.k)[3]++; persist();
   G.wrong.set(C.item.k, { item: C.item, miss: (G.wrong.get(C.item.k)?.miss || 0) + 1, reached: G.wrong.get(C.item.k)?.reached || false });
   breakCombo();
   PAD.fails.push({ pts: d.pts.slice(), at: fx.t });
-  for (let i = 0; i < d.pts.length; i += 3) addSparks(d.pts[i][0], d.pts[i][1], 2, i % 2 ? [1, .15, .25] : [1, .5, .2], 1.4, .5);
+  for (let i = 0; i < d.pts.length; i += 3) addSparks(d.pts[i][0], d.pts[i][1], 2, i % 2 ? [1, .15, .25] : [1, .45, .5], 1.4, .5, -1);
   flashClass(padWrap, "bad");
   const m = d.pts[d.pts.length >> 1], mx = d.r.left + m[0], my = d.r.top + m[1];
   popText(mx, my, MISS_TEXT[reason] || "ちがう!", "ng");
   const hp = heartsPos();
-  bolt(d.r.left + d.r.width / 2, d.r.top, hp[0], hp[1], RED, .8, .35);
+  shot(d.r.left + d.r.width / 2, d.r.top, hp[0], hp[1], RED, .8, .35, true);
   shockwave(d.r.left + d.r.width / 2, d.r.top + d.r.height / 2, .45, RED);
   E.prog = Math.min(.995, E.prog + MISFIRE_PUSH);
   ticker.className = "ng";
   if (C.streak >= HINT_AFTER && !C.hint) {
     C.hint = true; ticker.className = "hl"; ticker.textContent = `💡 ヒント: ${C.cs.k + 1}画目はここ! 光の向きに書こう`; sfx.hint();
-  } else ticker.textContent = `💥 暴発! ${MISS_TEXT[reason] || "ちがう!"} もう一度 ${C.cs.k + 1}画目`;
+  } else ticker.textContent = `🎵 音はずれ! ${MISS_TEXT[reason] || "ちがう!"} もう一度 ${C.cs.k + 1}画目`;
   sfx.ng();
-  hurt(MISFIRE_DMG, "暴発!");
+  hurt(MISFIRE_DMG, "音はずれ!");
 }
 function useHint() {
   if (phase !== "play" || !C || C.locked || C.complete || C.hint) return;
@@ -1959,7 +2093,7 @@ function breakCombo() {
   fx.shakeAt = fx.t;
   if (lost >= 3) popText(W / 2, H * .22, `${lost} COMBO 途切れた…`, "ng");
 }
-// 最後の画: 漢字が完成して必殺の大爆発
+// 最後の画: 漢字が完成して必殺 = ライブのフィナーレ (紙吹雪・音符・星・スポットライト)
 function charDone() {
   const item = C.item, n = C.paths.length, sec = fx.t - C.at, tgt = targetSec(n), clean = C.miss === 0;
   C.complete = true; C.locked = true; C.sec = sec; C.hint = false; bHint.disabled = true;
@@ -1986,11 +2120,13 @@ function charDone() {
   const r = pad.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   slam(item.k, `${E.boss ? "BOSS " : ""}撃破!! +${gain.toLocaleString()} ${label}`, "go kanji");
   popText(ex, ey - eu * .6, "+" + gain.toLocaleString(), speed > .45 ? "big" : "");
-  bolt(cx, cy, ex, ey, [1, 1, 1], 2.6, .55); bolt(r.left, r.top, ex, ey, fx.gold > .5 ? GOLD : palAt(fx.shownGear, fx.hue), 1.6, .5); bolt(r.right, r.top, ex, ey, E.col, 1.6, .5);
-  flash(clean ? .7 : .45, clean ? (G.combo >= GOD_COMBO ? GOLD : [1, 1, 1]) : palAt(fx.shownGear, fx.hue));
-  shockwave(ex, ey, E.boss ? 2.2 : 1.6, E.col); shockwave(ex, ey, .8); shockwave(cx, cy, 1.3); shockwave(cx, cy, .7);
-  burst(ex, ey, E.boss ? 140 : 90, E.boss ? 2 : 1.4, 0, E.col); burst(ex, ey, 50, .8, .12);
-  fireworks(clean ? 3 + Math.min(6, G.combo) : 2); if (E.boss) fireworks(8);
+  shot(cx, cy, ex, ey, WHITE, 2, .4); shot(r.left, r.top, ex, ey, fx.gold > .5 ? GOLD : palAt(fx.shownGear, fx.hue), 1.4, .42); shot(r.right, r.top, ex, ey, E.col, 1.4, .42);
+  flash(clean ? .55 : .35, clean ? (G.combo >= GOD_COMBO ? GOLD : [1, .92, .98]) : palAt(fx.shownGear, fx.hue));
+  shockwave(ex, ey, E.boss ? 2.2 : 1.6, E.col); shockwave(ex, ey, .8, SAKURA, .1); shockwave(cx, cy, 1.3); shockwave(cx, cy, .7, TEAL, .1);
+  burst(ex, ey, E.boss ? 120 : 80, E.boss ? 2 : 1.4, 0, E.col); burst(ex, ey, 44, .8, .12);
+  spotlight(ex, ey, E.boss ? 6 : 4, E.boss ? 1.9 : 1.4, fx.gold > .5 ? [GOLD, WHITE] : [TEAL, SAKURA, LAV, WHITE]);
+  confetti(ex, ey, E.boss ? 90 : 50, E.boss ? 1.3 : 1); confetti(0, 0, (clean ? 40 + 8 * Math.min(6, G.combo) : 24) * (E.boss ? 2 : 1), 1, true);
+  fireworks(clean ? 2 + Math.min(4, G.combo) : 1); if (E.boss) fireworks(5);
   fx.shakeAt = fx.t;
   sfx.ok(G.combo, speed > 0); sfx.boom(); buzz([20, 30, 60]);
   if (clean && G.hp < HP_MAX) {
@@ -1999,7 +2135,7 @@ function charDone() {
   }
   if (zr.isNew || zr.gold) setTimeout(() => popText(cx, r.top + r.height * .35, zr.gold ? "★ 図鑑に金の印!" : "📖 図鑑に登録!", "big"), 350);
   ticker.className = "ok";
-  ticker.textContent = `⚡ ${item.w}(${item.r}) 撃破! ${clean ? "ノーミス" : `ミス${C.miss}画`} ・ ${sec.toFixed(1)}秒`;
+  ticker.textContent = `♪ ${item.w}(${item.r}) 撃破! ${clean ? "ノーミス" : `ミス${C.miss}画`} ・ ${sec.toFixed(1)}秒`;
   updateStatus();
   // ギアと節目
   let wait = E.boss ? 1500 : 1150;
@@ -2009,8 +2145,8 @@ function charDone() {
     const lvl = MILESTONES.indexOf(G.combo); wait = 1800;
     setTimeout(() => {
       if (phase !== "play" && phase !== "end") return;
-      slam(`${G.combo} COMBO!!`, fx.t - fx.morphAt < .8 ? `▶▶ ${GEAR_NAMES[fx.gear]}` : (G.combo >= GOD_COMBO ? "★ 神 速 ★ 得点2倍" : "ノーミス連続撃破!!"));
-      flash(Math.min(1, .4 + .12 * lvl)); fireworks(3 + lvl * 2); shockwave(W / 2, H / 2, 1.8); sfx.milestone(); buzz([30, 30, 60]);
+      slam(`${G.combo} COMBO!!`, fx.t - fx.morphAt < .8 ? `♪ ${GEAR_NAMES[fx.gear]}` : (G.combo >= GOD_COMBO ? "★ FEVER 最高潮 ★ 得点2倍" : "ノーミス連続撃破!!"));
+      flash(Math.min(.8, .35 + .1 * lvl)); fireworks(2 + lvl); shockwave(W / 2, H / 2, 1.8); spotlight(W / 2, H * .3, 4 + Math.min(2, lvl), 1.5, G.combo >= GOD_COMBO ? [GOLD, WHITE] : null); confetti(0, 0, 30 + 10 * lvl, 1, true); sfx.milestone(); buzz([30, 30, 60]);
     }, 650);
   } else if (fx.t - fx.morphAt < .1) setTimeout(() => slam(GEAR_NAMES[fx.gear], "", "quick"), 650);
   setTimeout(() => { if (phase === "play") next(); }, wait);
@@ -2049,7 +2185,7 @@ function gameOver() {
 function finish() {
   if (phase !== "play") return;
   phase = "end"; G.endedBy = "quit"; if (C) C.locked = true; PAD.drawing = null;
-  slam("バトル終了!!", `${G.kills}体 倒した!`); sfx.end(); flash(.7); shockwave(W / 2, H / 2, 2);
+  slam("バトル終了!!", `${G.kills}体 倒した!`); sfx.end(); flash(.5); shockwave(W / 2, H / 2, 2); spotlight(W / 2, H * .4, 4, 1.4);
   persist();
   setTimeout(showResult, 1500);
 }
@@ -2085,7 +2221,8 @@ function showResult() {
   fx.gear = rank === "S" ? 2 : rank === "A" ? 1 : 0; fx.morphFrom = fx.gear;
   setTimeout(() => {
     slam(rank === "S" ? "S RANK!!!" : rank + " RANK!", newBest ? "★ NEW RECORD ★" : `${G.kills}体撃破`);
-    fireworks(newBest || rank === "S" ? 14 : 5); flash(.6); shockwave(W / 2, H * .25, 2); (newBest ? sfx.fanfare : sfx.milestone)();
+    fireworks(newBest || rank === "S" ? 8 : 3); flash(.45); shockwave(W / 2, H * .25, 2); (newBest ? sfx.fanfare : sfx.milestone)();
+    spotlight(W / 2, H * .06, newBest || rank === "S" ? 6 : 4, 1.8); confetti(0, 0, newBest || rank === "S" ? 140 : 60, 1, true);
   }, 120);
 }
 function toTitle() { phase = "title"; C = null; E = null; fx.gear = fx.morphFrom = 1; fx.energyTarget = .3; refreshTitle(); show("title"); }
@@ -2161,7 +2298,7 @@ function drawReview() {
   // 完成した字を少し見せてから結果へ
   if (t >= RV.total && !RV.done) {
     RV.done = true; RV.endAt = fx.t + REVIEW_HOLD; sfx.ok(0, false);
-    const r = rvc.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 40, .8, 0, [1, .4, .55]);
+    const r = rvc.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 40, .8, 0, SAKURA);
   }
   if (fx.t >= RV.endAt) showResult();
 }
@@ -2171,7 +2308,7 @@ let zFrom = "title";
 const zgrid = $("#zgrid"), zc = $("#zc"), zctx = zc.getContext("2d"), zcwrap = $("#zcwrap");
 function openZukan() {
   if (phase !== "title" && phase !== "result") return;
-  zFrom = phase; phase = "zukan"; fx.energyTarget = .3;
+  zFrom = phase; phase = "zukan"; fx.energyTarget = .3; fx.conf.length = 0; fx.spots.length = 0;
   show("zukan");
   zgrid.textContent = "";
   for (const d of DATA) {
@@ -2239,7 +2376,7 @@ function drawZPlay() {
     c.strokeStyle = glow; c.lineWidth = (INK_W + 2) * k; c.shadowColor = glow; c.shadowBlur = S * .03; c.stroke();
     c.shadowBlur = 0; c.strokeStyle = "#fff"; c.lineWidth = INK_W * k; c.stroke();
     // 書き順の番号 (書き始めの位置)
-    c.fillStyle = ZP.clean ? "rgba(255,214,90,.95)" : "rgba(120,230,255,.95)"; c.font = `900 ${S * .045}px system-ui,sans-serif`;
+    c.fillStyle = ZP.clean ? "rgba(255,214,107,.95)" : "rgba(127,240,230,.95)"; c.font = `900 ${S * .045}px system-ui,sans-serif`;
     c.textAlign = "center"; c.textBaseline = "middle";
     c.fillText(String(i + 1), P[0][0] * k - S * .035, P[0][1] * k - S * .035);
     if (a < 1) { // ペン先の光
@@ -2251,7 +2388,7 @@ function drawZPlay() {
   });
   if (t >= ZP.total && !ZP.done) {
     ZP.done = true; sfx.ok(ZP.clean ? 10 : 0, ZP.clean);
-    const r = zc.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 50, .9, 0, ZP.clean ? GOLD : null);
+    const r = zc.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 50, .9, 0, ZP.clean ? GOLD : null); if (ZP.clean) confetti(r.left + r.width / 2, r.top + r.height * .6, 40, .8);
   }
 }
 

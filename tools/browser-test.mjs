@@ -73,7 +73,7 @@ async function drawStroke(pts, opt = {}, p = page) {
 const waitPlay = (p = page) => p.waitForFunction(() => phase === "play" && C && !C.complete && !C.locked && E && E.state === "come", null, { timeout: 8000 });
 const refsNow = (p = page) => p.evaluate(() => C.refPts);
 const S = () => page.evaluate(() => ({ phase, k: C?.item.k, n: C?.paths.length, ck: C?.cs.k, miss: C?.miss, hint: C?.hint, ehp: E?.hp, estate: E?.state, eprog: E?.prog,
-  boss: E?.boss, hp: G.hp, kills: G.kills, dmg: G.dmg, score: G.score, combo: G.combo, ticker: ticker.textContent, bolts: fx.bolts.length }));
+  boss: E?.boss, hp: G.hp, kills: G.kills, dmg: G.dmg, score: G.score, combo: G.combo, ticker: ticker.textContent, shots: fx.shots.length }));
 
 await page.click("#bStart", { force: true });
 await waitPlay();
@@ -91,7 +91,7 @@ const first = s.k;
 await page.evaluate(() => { E.limit = 1e4; });
 await drawStroke(refs[0].filter((_, j) => j % 2 === 0), { wait: 30 });
 s = await S();
-check(s.ck === 1 && s.ehp === s.n - 1 && s.bolts > 0 && s.dmg === 1, `[battle] 正しい1画目 → 雷 (bolts=${s.bolts}) が落ちて敵HP ${s.n}→${s.ehp}, 画ダメージ=${s.dmg}, score=${s.score}`);
+check(s.ck === 1 && s.ehp === s.n - 1 && s.shots > 0 && s.dmg === 1, `[battle] 正しい1画目 → 音符 (shots=${s.shots}) が飛んで敵HP ${s.n}→${s.ehp}, 画ダメージ=${s.dmg}, score=${s.score}`);
 await shot("2-bolt.png");
 // (a2) pointercancel (ブラウザ・OS にジェスチャーとして奪われた画) は捨てる: インクも残らず、ミスにもヒントのカウントにもならない。
 // 正しい画 (確定すれば OK になるもの) と逆向きの画 (確定すれば暴発するもの) の両方で確かめる
