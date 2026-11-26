@@ -186,6 +186,19 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #zcwrap.gold{border-color:#ffc83d;box-shadow:0 0 30px #ffc83d,0 0 70px #ff9d00}
 #zc{display:block;border-radius:16px}
 #zplay .cbtns{display:flex;gap:10px;width:min(90vw,420px)}
+#review{position:fixed;inset:0;z-index:6;background:rgba(14,0,6,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vh;padding:14px;cursor:pointer;text-align:center;font-weight:900}
+#rvhead{font-size:min(5.4vw,3vh);color:#ff8aa0;text-shadow:0 0 12px #ff0040}
+#rvinfo{display:flex;align-items:center;gap:14px}
+#rvK{font-size:min(15vw,8vh);line-height:1;text-shadow:0 0 16px #ff4d6d}
+#rvinfo .t{text-align:left}
+#rvW{font-size:min(8vw,4.6vh)}
+#rvR{font-size:min(4.6vw,2.6vh);opacity:.9}
+#rvwrap{border-radius:20px;border:4px solid #ff6b84;background:rgba(3,3,12,.95);box-shadow:0 0 30px #ff2050}
+#rvc{display:block;border-radius:16px}
+#rvnote{font-size:min(3.8vw,2.2vh);opacity:.85;font-weight:700}
+#rvnote b{color:#ff8aa0}
+#rvskip{font-size:min(4vw,2.3vh);opacity:.7;animation:rvblink 1.2s ease-in-out infinite}
+@keyframes rvblink{50%{opacity:.35}}
 
 #mute{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;font-size:22px;background:rgba(0,0,0,.5);
   border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:50%;width:44px;height:44px;cursor:pointer}
@@ -273,6 +286,14 @@ body.inzukan #mute{display:none}
   <div id="zinfo"><div class="w" id="zW"></div><div class="r" id="zR"></div><div class="m" id="zM"></div></div>
   <div id="zcwrap"><canvas id="zc"></canvas></div>
   <div class="cbtns"><button class="cbtn" id="bZreplay">▶ もう一回再生</button><button class="cbtn" id="bZclose">とじる</button></div>
+</div>
+
+<div id="review" class="hide">
+  <div id="rvhead">GAME OVER ── この字を おぼえよう!!</div>
+  <div id="rvinfo"><div id="rvK"></div><div class="t"><div id="rvW"></div><div id="rvR"></div></div></div>
+  <div id="rvwrap"><canvas id="rvc"></canvas></div>
+  <div id="rvnote">白 = きみが書けた画 ・ <b>赤 = のこりの画 (書き順どおり)</b></div>
+  <div id="rvskip">タップで 結果へ ▶</div>
 </div>
 
 <canvas id="fx" class="full"></canvas>
@@ -1057,6 +1078,7 @@ function resize() {
   if (gl) gl.viewport(0, 0, bg.width, bg.height);
   layoutPad();
   if (!zplayEl.classList.contains("hide")) layoutZPlay();
+  if (RV.on) layoutReview();
 }
 function layoutPad() {
   if ($("#game").classList.contains("hide")) return;
@@ -1649,6 +1671,7 @@ function loop(ms) {
   } else { fx.cx = W / 2; fx.cy = H * .4; }
   drawBg(); drawFoe(); drawFx();
   if (!zplayEl.classList.contains("hide")) drawZPlay();
+  if (RV.on) drawReview();
   requestAnimationFrame(loop);
 }
 let titleBurstAt = 0;
@@ -1939,7 +1962,9 @@ function gameOver() {
   phase = "end"; G.endedBy = "over"; if (C) C.locked = true; PAD.drawing = null;
   slam("GAME OVER", `${G.kills}体 倒した!`, "go red"); sfx.over(); flash(.9, RED); shockwave(W / 2, H / 2, 2.2, RED);
   persist();
-  setTimeout(showResult, 2000);
+  // 書きかけの字があれば、結果の前に残りの画を書き順どおりに見せる
+  const rv = reviewTarget();
+  setTimeout(() => { if (phase !== "end") return; if (rv) openReview(rv); else showResult(); }, rv ? REVIEW_DELAY_MS : 2000);
 }
 function finish() {
   if (phase !== "play") return;
@@ -1950,6 +1975,7 @@ function finish() {
 }
 function rankOf(score) { return RANKS.find(r => score >= r[1])[0]; }
 function showResult() {
+  closeReview();
   phase = "result"; show("result"); E = null;
   const newBest = G.score > save.bestB && !G.weak;
   if (newBest) { save.bestB = G.score; persist(); }
@@ -1983,6 +2009,73 @@ function showResult() {
   }, 120);
 }
 function toTitle() { phase = "title"; C = null; E = null; fx.gear = fx.morphFrom = 1; fx.energyTarget = .3; refreshTitle(); show("title"); }
+
+// ───────────────────────── ゲームオーバー時の復習 ─────────────────────────
+// 書きかけの字: 書けた画は本人の軌跡のまま、残りの画を正しい書き順で1画ずつ描いて見せてから結果へ
+const REVIEW_DELAY_MS = 1500, REVIEW_HOLD = 2.2;
+const RV = { on: false, item: null, own: [], rest: [], from: 0, starts: [], durs: [], t0: 0, total: 0, played: -1, done: false, endAt: 0, S: 0, openAt: 0 };
+const reviewEl = $("#review"), rvc = $("#rvc"), rvctx = rvc.getContext("2d");
+function reviewTarget() { // 書きかけの字が無ければ null
+  if (!C || (C.complete && !C.failed) || C.cs.k >= C.paths.length) return null;
+  return { item: C.item, own: C.ink.map(s => s.p), rest: C.refPts.slice(C.cs.k), from: C.cs.k };
+}
+function layoutReview() {
+  const S = Math.floor(Math.max(160, Math.min(innerWidth * .82, innerHeight * .48, 480)));
+  RV.S = S; rvc.style.width = rvc.style.height = S + "px"; rvc.width = rvc.height = S * DPR | 0;
+}
+function openReview(rv) {
+  Object.assign(RV, rv);
+  const du = clamp(5.5 / rv.rest.length, .35, .6); // 1画の長さ。残りが多いほど速く
+  RV.starts = rv.rest.map((_, i) => i * (du + .16)); RV.durs = rv.rest.map(() => du);
+  RV.total = rv.rest.length * (du + .16);
+  RV.t0 = fx.t + .45; RV.openAt = fx.t; RV.played = -1; RV.done = false; RV.endAt = Infinity;
+  $("#rvK").textContent = rv.item.k; $("#rvW").textContent = rv.item.w; $("#rvR").textContent = rv.item.r;
+  RV.on = true; reviewEl.classList.remove("hide"); layoutReview();
+}
+function closeReview() { RV.on = false; reviewEl.classList.add("hide"); }
+function skipReview() { if (RV.on && fx.t - RV.openAt > .25) showResult(); }
+function drawReview() {
+  const S = RV.S, c = rvctx, k = S / 109, t = fx.t - RV.t0;
+  c.setTransform(DPR, 0, 0, DPR, 0, 0); c.clearRect(0, 0, S, S);
+  c.strokeStyle = "rgba(255,255,255,.14)"; c.lineWidth = 1.5; c.setLineDash([7, 7]);
+  c.beginPath(); c.moveTo(S / 2, 8); c.lineTo(S / 2, S - 8); c.moveTo(8, S / 2); c.lineTo(S - 8, S / 2); c.stroke(); c.setLineDash([]);
+  c.lineCap = c.lineJoin = "round"; c.textAlign = "center"; c.textBaseline = "middle"; c.font = `900 ${S * .05}px system-ui,sans-serif`;
+  const labels = []; // 画の番号は最後にまとめて描く (後の画に隠れないように)
+  const label = (P, i, col) => labels.push([String(i + 1), P[0][0] * k - S * .038, P[0][1] * k - S * .038, col]);
+  // 書けた画: 本人の軌跡のまま
+  const glow = css(palAt(fx.shownGear, fx.hue + .33));
+  RV.own.forEach((P, i) => {
+    smoothPath(c, P, k);
+    c.strokeStyle = glow; c.lineWidth = (INK_W + 2) * k; c.shadowColor = glow; c.shadowBlur = S * .03; c.stroke();
+    c.shadowBlur = 0; c.strokeStyle = "#fff"; c.lineWidth = INK_W * k; c.stroke();
+    label(P, i, "rgba(255,255,255,.8)");
+  });
+  // 残りの画: 正しい書き順で1画ずつ
+  RV.rest.forEach((P, j) => {
+    if (t < RV.starts[j]) return;
+    const a = clamp((t - RV.starts[j]) / RV.durs[j], 0, 1), i = RV.from + j;
+    if (j > RV.played) { RV.played = j; sfx.stroke(i); }
+    const Q = partial(P, a);
+    smoothPath(c, Q, k);
+    c.strokeStyle = "#ff2a55"; c.lineWidth = (INK_W + 2) * k; c.shadowColor = "#ff0040"; c.shadowBlur = S * .035; c.stroke();
+    c.shadowBlur = 0; c.strokeStyle = "#ffb3c2"; c.lineWidth = INK_W * k; c.stroke();
+    label(P, i, "#ff8aa0");
+    if (a < 1) { // ペン先の光
+      const e = Q[Q.length - 1], g = c.createRadialGradient(e[0] * k, e[1] * k, 0, e[0] * k, e[1] * k, S * .07);
+      g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.3, "#ff4d6d"); g.addColorStop(1, "rgba(0,0,0,0)");
+      c.globalCompositeOperation = "lighter"; c.fillStyle = g; c.beginPath(); c.arc(e[0] * k, e[1] * k, S * .07, 0, TAU); c.fill();
+      c.globalCompositeOperation = "source-over";
+    }
+  });
+  c.lineWidth = S * .012; c.strokeStyle = "rgba(0,0,0,.85)";
+  for (const [s, x, y, col] of labels) { c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); }
+  // 完成した字を少し見せてから結果へ
+  if (t >= RV.total && !RV.done) {
+    RV.done = true; RV.endAt = fx.t + REVIEW_HOLD; sfx.ok(0, false);
+    const r = rvc.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 40, .8, 0, [1, .4, .55]);
+  }
+  if (fx.t >= RV.endAt) showResult();
+}
 
 // ───────────────────────── 図鑑 ─────────────────────────
 let zFrom = "title";
@@ -2084,11 +2177,13 @@ $("#bZback").onclick = closeZukan;
 $("#bZreplay").onclick = replayZ;
 $("#bZclose").onclick = closeZPlay;
 zplayEl.addEventListener("pointerdown", e => { if (e.target === zplayEl) closeZPlay(); });
+reviewEl.addEventListener("click", skipReview);
 bHint.onclick = useHint;
 $("#bQuit").onclick = () => { if (phase === "play") finish(); else if (phase === "count") toTitle(); };
 $("#mute").onclick = () => { muted = !muted; $("#mute").textContent = muted ? "🔇" : "🔊"; audio(); };
 addEventListener("keydown", e => {
   if (e.repeat) return;
+  if (RV.on) { if (e.key === " " || e.key === "Enter" || e.key === "Escape") { e.preventDefault(); skipReview(); } return; }
   if (e.key === "Escape") { if (!zplayEl.classList.contains("hide")) closeZPlay(); else if (phase === "zukan") closeZukan(); return; }
   if (phase === "play" && (e.key === "h" || e.key === "H")) useHint();
   else if ((e.key === " " || e.key === "Enter") && (phase === "title" || phase === "result")) { e.preventDefault(); start(false); }

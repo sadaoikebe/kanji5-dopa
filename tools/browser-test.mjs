@@ -1,7 +1,8 @@
 // ブラウザ (Chromium) での確認。
 //  1. getPointAtLength の標本が Node 側の標本と一致し、ブラウザ標本でも判定が通る/弾くか
 //  2. バトルを実際にマウスで書いて通す: 正しい画で敵を倒す / まちがえた画で暴発ダメージ / 敵の到達でダメージ /
-//     体力0でゲームオーバー → 結果 / にげる (手動終了) → 結果 / 図鑑に保存されて再生できる / 図鑑の容量と間引き / 旧データ互換
+//     体力0でゲームオーバー → 書きかけの字の復習 (残りの画を書き順どおりに) → 結果 / 復習はタップで飛ばせる /
+//     書きかけの字が無いゲームオーバーは復習なしで結果 / にげる (手動終了) → 結果 / 図鑑に保存されて再生できる / 図鑑の容量と間引き / 旧データ互換
 // 使い方: PW=/path/to/node_modules/playwright/index.mjs node tools/browser-test.mjs [index.html] [スクショ保存先]
 //   (playwright は同梱しない。npm i playwright && npx playwright install chromium で用意する)
 //   どれかの確認が落ちたら exit 1
@@ -134,13 +135,49 @@ await page.waitForTimeout(1400); await shot("6-boss.png");
 const lay = await page.evaluate(() => { const a = pad.getBoundingClientRect(), b = promptEl.getBoundingClientRect(); return { pad: [a.left, a.top, a.width, a.height].map(Math.round), prompt: [b.left, b.top, b.width, b.height].map(Math.round), overlap: !(b.bottom <= a.top || b.top >= a.bottom || b.right <= a.left || b.left >= a.right) }; });
 check(!lay.overlap, `[layout] 縦長 420x860: 書き取りエリア ${lay.pad} と 札 ${lay.prompt} は重ならない`);
 
-// (d) 体力 0 → ゲームオーバー → 結果画面
-await page.evaluate(() => { G.hp = 1; renderHp(); });
+// (d) 書きかけの字で体力 0 → ゲームオーバー → 復習表示 → 結果画面
+await page.evaluate(() => { E.limit = 1e4; });
 refs = await refsNow();
-await drawStroke(refs[0].slice().reverse().filter((_, j) => j % 2 === 0));
+await drawStroke(refs[0].filter((_, j) => j % 2 === 0));
+await drawStroke(refs[1].filter((_, j) => j % 2 === 0));
+const pre = await page.evaluate(() => ({ k: C.item.k, ck: C.cs.k, n: C.paths.length, ink: C.ink.map(s => s.p) }));
+check(pre.ck === 2, `[review] 書きかけを作る: 「${pre.k}」 ${pre.ck}/${pre.n}画 まで正しく書いた`);
+// 復習の各フレームを記録する (どの画が何秒に描き始められたか)
+await page.evaluate(() => {
+  window.__rv = { frames: [], firstOn: -1 };
+  const f = () => { if (RV.on) { if (__rv.firstOn < 0) __rv.firstOn = fx.t; __rv.frames.push([fx.t, RV.played]); } requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+});
+await page.evaluate(() => { G.hp = 1; renderHp(); });
+await drawStroke(refs[2].slice().reverse().filter((_, j) => j % 2 === 0));
 s = await S();
 check(s.phase === "end" && s.hp === 0, `[battle] 体力1で暴発 → HP=${s.hp} phase=${s.phase}`);
-await page.waitForFunction(() => phase === "result", null, { timeout: 5000 });
+await page.waitForFunction(() => RV.on, null, { timeout: 5000 });
+const rv0 = await page.evaluate(() => ({ phase, from: RV.from, rest: RV.rest.length, own: RV.own, k: $("#rvK").textContent, w: $("#rvW").textContent, r: $("#rvR").textContent,
+  item: [C.item.k, C.item.w, C.item.r], sameRefs: RV.rest.every((P, j) => P === C.refPts[RV.from + j]), vis: !reviewEl.classList.contains("hide"), resHidden: $("#result").classList.contains("hide") }));
+check(rv0.vis && rv0.resHidden && rv0.phase === "end", `[review] ゲームオーバー → 結果の前に復習表示が出る (表示=${rv0.vis}, 結果画面はまだ=${rv0.resHidden})`);
+check(rv0.k === rv0.item[0] && rv0.w === rv0.item[1] && rv0.r === rv0.item[2], `[review] 漢字・熟語・読みを表示: "${rv0.k}" "${rv0.w}" "${rv0.r}"`);
+check(rv0.from === 2 && rv0.rest === pre.n - 2 && rv0.sameRefs, `[review] 残りの画 = ${rv0.from + 1}〜${pre.n}画目 (${rv0.rest}画、お手本の書き順の並びそのまま)`);
+check(JSON.stringify(rv0.own) === JSON.stringify(pre.ink) && rv0.own.length === 2, `[review] 書けた画は本人の軌跡のまま残す: ${rv0.own.length}画 (点数 ${rv0.own.map(p => p.length).join(",")})`);
+await page.waitForFunction(() => RV.played >= 2, null, { timeout: 8000 });
+await page.waitForTimeout(100); await shot("7-review-mid.png");
+const midPx = await page.evaluate(() => { const d = rvctx.getImageData(0, 0, rvc.width, rvc.height).data; let red = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] < 120 && d[i + 3] > 200) red++; return red; });
+check(midPx > 200, `[review] 残りの画が赤で描かれている (赤い画素 ${midPx})`);
+await page.waitForFunction(() => RV.done, null, { timeout: 20000 });
+await page.waitForTimeout(150); await shot("7-review-done.png");
+const stillOn = await page.evaluate(() => RV.on && phase === "end");
+check(stillOn, `[review] 完成した字を少し見せる (完成直後はまだ復習表示のまま)`);
+await page.waitForFunction(() => phase === "result", null, { timeout: 8000 });
+const rvlog = await page.evaluate(() => {
+  const st = []; let prev = -1;
+  for (const [t, p] of __rv.frames) { if (p !== prev) { st.push({ p, t: +(t - __rv.firstOn).toFixed(2) }); prev = p; } }
+  return { st, last: +(__rv.frames[__rv.frames.length - 1][0] - __rv.firstOn).toFixed(2), rvOn: RV.on, hidden: reviewEl.classList.contains("hide") };
+});
+const order = rvlog.st.map(x => x.p);
+const inOrder = order.length === rv0.rest && order.every((p, i) => p === i); // played は 0,1,2,… と1つずつ増える (描き始めた画の番号)
+log(`[review] 描き始め (秒, 復習表示から): ${rvlog.st.filter(x => x.p >= 0).map(x => `${x.p + rv0.from + 1}画目@${x.t}`).join(" ")}`);
+check(inOrder, `[review] 残りの画を1画ずつ書き順どおりに描く: ${rv0.from + 1}→${pre.n}画目 (飛ばし・逆順なし)`);
+check(!rvlog.rvOn && rvlog.hidden, `[review] 完成から少し後に自動で結果画面へ (復習表示 ${rvlog.last}秒で閉じた)`);
 await page.waitForTimeout(300);
 let res = await page.evaluate(() => ({ head: $("#rhead").textContent, rank: $("#rank").textContent, score: $("#rscore").textContent, kills: $("#rK").textContent, dmg: $("#rD").textContent,
   done: $("#rdone").textContent, best: $("#rnew").textContent, bestB: save.bestB, bestW: save.bestW, miss: $("#rmiss").textContent }));
@@ -154,10 +191,40 @@ await page.click("#bAgain", { force: true });
 await waitPlay();
 s = await S();
 check(s.hp === 10 && s.kills === 0, `[battle] もう一回: HP=${s.hp} 撃破=${s.kills} 1体目=${s.k}`);
+await page.evaluate(() => { window.__rvSeen = false; const f = () => { if (RV.on) __rvSeen = true; if (phase !== "result") requestAnimationFrame(f); }; requestAnimationFrame(f); });
 await page.click("#bQuit", { force: true });
 await page.waitForFunction(() => phase === "result", null, { timeout: 5000 });
-res = await page.evaluate(() => ({ head: $("#rhead").textContent, kills: $("#rK").textContent }));
-check(res.head === "バトル終了", `[result] にげる → 結果: "${res.head}" 倒した敵=${res.kills}`);
+res = await page.evaluate(() => ({ head: $("#rhead").textContent, kills: $("#rK").textContent, seen: __rvSeen }));
+check(res.head === "バトル終了" && !res.seen, `[result] にげる → 復習なしで結果: "${res.head}" 倒した敵=${res.kills} 復習表示=${res.seen}`);
+
+// (e2) 復習はタップで飛ばせる
+await page.click("#bAgain", { force: true });
+await waitPlay();
+await page.evaluate(() => { E.limit = 1e4; G.hp = 1; renderHp(); });
+refs = await refsNow();
+await drawStroke(refs[0].slice().reverse().filter((_, j) => j % 2 === 0));
+await page.waitForFunction(() => RV.on, null, { timeout: 5000 });
+await page.waitForTimeout(500);
+const before = await page.evaluate(() => ({ played: RV.played, rest: RV.rest.length, done: RV.done }));
+const tapAt = await page.evaluate(() => fx.t);
+await page.mouse.click(210, 120);
+await page.waitForFunction(() => phase === "result", null, { timeout: 3000 });
+const sk = await page.evaluate(t0 => ({ dt: +(fx.t - t0).toFixed(2), on: RV.on, hidden: reviewEl.classList.contains("hide"), head: $("#rhead").textContent }), tapAt);
+check(!before.done && !sk.on && sk.hidden && sk.head === "GAME OVER" && sk.dt < .5,
+  `[review] タップで飛ばす: ${before.played + 1}/${before.rest}画の途中でタップ → ${sk.dt}秒で結果画面 "${sk.head}"`);
+
+// (e3) 書きかけの字が無いところでのゲームオーバー → 復習なしで結果
+await page.click("#bAgain", { force: true });
+await waitPlay();
+await page.evaluate(() => { E.limit = 1e4; });
+refs = await refsNow();
+for (const r of refs) await drawStroke(r.filter((_, j) => j % 2 === 0), { wait: 20 });
+await page.waitForFunction(() => C.complete && !C.failed, null, { timeout: 3000 });
+await page.evaluate(() => { window.__rvSeen = false; const f = () => { if (RV.on) __rvSeen = true; if (phase !== "result") requestAnimationFrame(f); }; requestAnimationFrame(f); hurt(G.hp, "test"); });
+await page.waitForFunction(() => phase === "result", null, { timeout: 5000 });
+res = await page.evaluate(() => ({ head: $("#rhead").textContent, seen: __rvSeen, k: C.item.k }));
+const zExpect = new Set([first, res.k]).size; // (e3) で倒した字も図鑑に入る
+check(res.head === "GAME OVER" && !res.seen, `[review] 書きかけの字が無いゲームオーバー (字を完成させた直後) → 復習なしで結果: "${res.head}" 復習表示=${res.seen}`);
 
 // (f) 図鑑を開いて再生
 await page.click("#bTitle", { force: true }); await page.waitForTimeout(200);
@@ -165,9 +232,9 @@ const tstat = await page.evaluate(() => $("#tStats").textContent + " / " + $("#b
 log(`[title] ${tstat}`);
 await page.click("#bZukan", { force: true }); await page.waitForTimeout(300);
 let zk = await page.evaluate(() => ({ phase, count: $("#zcount").textContent, got: document.querySelectorAll(".zc.got").length, gold: document.querySelectorAll(".zc.gold").length, cells: document.querySelectorAll(".zc").length }));
-check(zk.phase === "zukan" && zk.count === "1/193" && zk.got === 1 && zk.gold === 1 && zk.cells === 193, `[zukan] 図鑑: 収録 ${zk.count} マス=${zk.cells} 収録済み=${zk.got} 金の印=${zk.gold}`);
+check(zk.phase === "zukan" && zk.count === `${zExpect}/193` && zk.got === zExpect && zk.gold === zExpect && zk.cells === 193, `[zukan] 図鑑: 収録 ${zk.count} マス=${zk.cells} 収録済み=${zk.got} 金の印=${zk.gold}`);
 await shot("8-zukan.png");
-await page.click(`.zc.got`, { force: true });
+await page.click(`.zc.got[data-k="${first}"]`, { force: true });
 await page.waitForTimeout(500);
 await shot("9-zplay-mid.png");
 await page.waitForFunction(() => ZP.done, null, { timeout: 30000 });
