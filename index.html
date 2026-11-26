@@ -863,8 +863,8 @@ const REACH_DMG = 3;           // 敵に到達されたときのダメージ
 const BOSS_REACH_DMG = 4;      // ボスに到達されたとき
 const HEAL_CLEAN = 1;          // ノーミスで倒すと回復
 const BOSS_STROKES = 15;       // この画数以上の字はボス
-const limitSec = n => 8 + 2.2 * n;   // 敵がトンネルの奥から到達するまでの秒数 (n = 画数)
-const RAMP = .97, RAMP_MIN = .7;     // 1体倒すごとに制限時間 x RAMP (最低 RAMP_MIN 倍まで)
+const limitSec = n => 10 + 2.75 * n; // 敵がトンネルの奥から到達するまでの秒数 (n = 画数)
+const RAMP = .97, RAMP_MIN = .8;     // 1体倒すごとに制限時間 x RAMP (最低 RAMP_MIN 倍まで)
 const MISFIRE_PUSH = .07;      // 暴発で敵が近づく量 (制限時間の割合)
 const STROKE_PTS = 100;        // 1画ダメージの点
 const KILL_PTS = 500;          // 撃破の点
