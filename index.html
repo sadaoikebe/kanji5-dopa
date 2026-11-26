@@ -7,7 +7,9 @@
 <title>漢字ブースト⑤ 書き取りバトル — 書いた漢字で敵をたおせ</title>
 <!-- 書き順データ: KanjiVG (https://kanjivg.tagaini.net, © Ulrich Apel, CC BY-SA 3.0) -->
 <style>
-:root{--c0:#ff4fd8;--c1:#35e6ff;--c2:#fff23a;--fc:#ff4fd8}
+:root{--c0:#ff4fd8;--c1:#35e6ff;--c2:#fff23a;--fc:#ff4fd8;--vh:1vh}
+/* 実際の表示領域の 1% (JS が innerHeight から入れなおす)。dvh があればそれを先に使う */
+@supports (height:1dvh){:root{--vh:1dvh}}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{height:100%;background:#000;overflow:hidden;color:#fff;overscroll-behavior:none;
   font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;touch-action:manipulation}
@@ -15,7 +17,7 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #bg{z-index:0}
 #foe{z-index:1;pointer-events:none}
 #fx{z-index:2;pointer-events:none}
-.screen{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.screen{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
 .hide{display:none!important}
 .glow{text-shadow:0 0 10px var(--c0),0 0 26px var(--c1),0 0 54px var(--c2)}
@@ -25,38 +27,42 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 
 /* ───── タイトル ───── */
 #title .logo{font-weight:900;line-height:.95;text-align:center;transform:rotate(-6deg)}
-#title .logo .a{display:block;font-size:min(34vw,22vh);-webkit-text-stroke:3px #fff;filter:drop-shadow(0 0 18px var(--c0)) drop-shadow(0 0 40px var(--c1))}
-#title .logo .b{display:block;font-size:min(15vw,9vh);font-style:italic;letter-spacing:.05em;color:#fff;margin-top:.1em}
+#title .logo .a{display:block;font-size:min(34vw,calc(22*var(--vh)));-webkit-text-stroke:3px #fff;filter:drop-shadow(0 0 18px var(--c0)) drop-shadow(0 0 40px var(--c1))}
+#title .logo .b{display:block;font-size:min(15vw,calc(9*var(--vh)));font-style:italic;letter-spacing:.05em;color:#fff;margin-top:.1em}
 #title .logo .b i{font-style:normal;color:var(--c2)}
-#title .logo .c{display:inline-block;font-size:min(9vw,5.4vh);font-style:normal;margin-top:.15em;padding:0 .3em;border:4px solid #fff;border-radius:.3em;
+#title .logo .c{display:inline-block;font-size:min(9vw,calc(5.4*var(--vh)));font-style:normal;margin-top:.15em;padding:0 .3em;border:4px solid #fff;border-radius:.3em;
   color:#000;background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2));box-shadow:0 0 20px var(--c1);transform:rotate(4deg)}
-#title .sub{margin-top:3vh;font-size:min(4.6vw,2.7vh);font-weight:800;text-align:center;line-height:1.6;opacity:.95}
-#title .stats{margin-top:1.2vh;font-size:min(3.8vw,2.3vh);font-weight:700;opacity:.85;text-align:center;line-height:1.5}
-.btns{display:flex;flex-direction:column;gap:1.4vh;margin-top:3vh;width:min(86vw,440px)}
-.btn{font:inherit;font-weight:900;font-size:min(7vw,4.2vh);padding:1.4vh 0;border-radius:999px;border:4px solid #fff;color:#000;cursor:pointer;
+#title .sub{margin-top:calc(3*var(--vh));font-size:min(4.6vw,calc(2.7*var(--vh)));font-weight:800;text-align:center;line-height:1.6;opacity:.95}
+#title .stats{margin-top:calc(1.2*var(--vh));font-size:min(3.8vw,calc(2.3*var(--vh)));font-weight:700;opacity:.85;text-align:center;line-height:1.5}
+.btns{display:flex;flex-direction:column;gap:calc(1.4*var(--vh));margin-top:calc(3*var(--vh));width:min(86vw,440px)}
+.btn{font:inherit;font-weight:900;font-size:min(7vw,calc(4.2*var(--vh)));padding:calc(1.4*var(--vh)) 0;border-radius:999px;border:4px solid #fff;color:#000;cursor:pointer;
   background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2));box-shadow:0 0 24px var(--c0),0 0 60px var(--c1);letter-spacing:.08em}
 .btn.main{animation:throb .7s ease-in-out infinite}
-.btn.sub2{background:rgba(0,0,0,.55);color:#fff;border-color:var(--c1);box-shadow:0 0 18px var(--c1);font-size:min(5.4vw,3.2vh)}
+.btn.sub2{background:rgba(0,0,0,.55);color:#fff;border-color:var(--c1);box-shadow:0 0 18px var(--c1);font-size:min(5.4vw,calc(3.2*var(--vh)))}
 .btn.zk{border-color:#ffc83d;box-shadow:0 0 18px #ffc83d}
 .btn:active{transform:scale(.94)}
 @keyframes throb{50%{transform:scale(1.06)}}
-.hint{margin-top:2.2vh;font-size:min(3.4vw,2vh);opacity:.7;text-align:center;line-height:1.5}
+.hint{margin-top:calc(2.2*var(--vh));font-size:min(3.4vw,calc(2*var(--vh)));opacity:.7;text-align:center;line-height:1.5}
 
-/* ───── バトル ───── */
-#game{justify-content:flex-start;padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
-#top{width:min(100%,680px);flex:none;display:flex;flex-direction:column;align-items:center}
-#hud{width:100%;height:11vh;display:flex;align-items:center;justify-content:space-between;flex:none}
-.hbox{width:28%;text-align:center;font-weight:900}
-.hbox .lb{font-size:min(3.4vw,1.8vh);letter-spacing:.15em;opacity:.85}
-.hbox .v{font-size:min(7.4vw,4.2vh);line-height:1.05;font-variant-numeric:tabular-nums}
-#combo .v{font-size:min(11vw,6vh)}
-#combo .x{font-size:min(3.6vw,1.9vh);color:var(--c2)}
+/* ───── バトル ─────
+   書き取りエリアが主役。寸法は layoutPad() が「欄の一辺を先に決め、残りを HUD・札・敵が分け合う」順で決める。
+   画面の高さは実際の表示領域 (--vh = innerHeight/100、JS で更新) を使う。calc(100*var(--vh)) は URL バーを隠した高さなので使わない。 */
+#game{justify-content:flex-start;padding:max(4px,env(safe-area-inset-top)) 8px max(4px,env(safe-area-inset-bottom))}
+#top{width:min(100%,760px);flex:none}
+/* HUD は1行: スコア | HP | 速度計 | COMBO */
+#hud{width:100%;height:clamp(40px,calc(6.2*var(--vh)),70px);display:flex;align-items:center;gap:4px;flex:none}
+.hbox{flex:none;width:clamp(58px,17%,130px);text-align:center;font-weight:900;line-height:1.05}
+.hbox .lb{font-size:clamp(8px,min(2.6vw,calc(1.35*var(--vh))),14px);letter-spacing:.12em;opacity:.85}
+.hbox .v{font-size:clamp(15px,min(5.4vw,calc(3.2*var(--vh))),34px);font-variant-numeric:tabular-nums;white-space:nowrap}
+#combo .v{font-size:clamp(17px,min(6.4vw,calc(3.6*var(--vh))),40px)}
+#comboV{display:inline-block}
+#combo .x{font-size:.5em;color:var(--c2);margin-left:.15em}
 .bump{animation:bump .25s cubic-bezier(.2,2,.4,1)}
 @keyframes bump{0%{transform:scale(1.7)}100%{transform:scale(1)}}
-#gaugeSlot{width:40%;height:100%}
-#hp{display:flex;align-items:center;gap:6px;height:3.2vh;flex:none;font-weight:900}
-#hp .lb{font-size:min(3.4vw,1.9vh);letter-spacing:.1em;color:#ff6b84;text-shadow:0 0 8px #ff0030}
-#hearts{display:flex;gap:2px;font-size:min(5.2vw,2.8vh);line-height:1}
+#gaugeSlot{flex:none;width:clamp(48px,15%,120px);height:100%}
+#hp{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;height:100%;font-weight:900}
+#hp .lb{font-size:clamp(8px,min(2.6vw,calc(1.4*var(--vh))),14px);letter-spacing:.06em;color:#ff6b84;text-shadow:0 0 8px #ff0030}
+#hearts{display:flex;gap:1px;font-size:clamp(11px,min(3.45vw,calc(2.9*var(--vh))),26px);line-height:1}
 #hearts span{color:#ff3d6e;text-shadow:0 0 8px #ff0040,0 0 18px #ff0040;transition:opacity .2s}
 #hearts span.x{color:#333;text-shadow:none;opacity:.6}
 #hearts span.lost{animation:heartlost .6s ease-out}
@@ -65,21 +71,26 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #hp.hurt{animation:hpHurt .5s ease-out}
 @keyframes hpHurt{0%,30%{transform:translateX(-8px)}15%,45%{transform:translateX(8px)}60%{transform:none}}
 #hp.low #hearts span:not(.x){animation:throb .45s infinite}
-#status{font-size:min(3.6vw,2vh);font-weight:900;height:2.4vh;font-variant-numeric:tabular-nums;letter-spacing:.06em;flex:none;white-space:nowrap}
-#status .fast{color:var(--c2)}
-#ticker{height:2.8vh;font-size:min(4vw,2.1vh);font-weight:800;opacity:.95;flex:none;display:flex;align-items:center;white-space:nowrap}
-#ticker.ok{color:#9dff9a}#ticker.ng{color:#ff6b84}#ticker.hl{color:var(--c2)}
 #stage{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:stretch}
-/* 敵が出てくる場所。敵そのものは #foe (書き取りエリアより下の層) に描くので、書き取りエリアに重ならない */
-#arena{position:relative;flex:none;height:clamp(170px,30vh,330px);width:100%}
-#prompt{position:absolute;left:50%;top:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;
-  padding:.15em .7em .3em;border-radius:14px;border:3px solid var(--fc);background:rgba(4,2,10,.72);
-  box-shadow:0 0 16px var(--fc),inset 0 0 18px rgba(0,0,0,.8);max-width:96%}
+/* 敵の出る帯。予約するのは 状態の行 + 札 + ティッカーの行 だけ。残りがあれば敵はそこへ、無ければ札の横に出る (#foe に描く) */
+#arena{position:relative;flex:1 1 0;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;overflow:visible}
+#status{flex:none;font-size:clamp(10px,min(3.1vw,calc(1.75*var(--vh))),17px);height:1.45em;line-height:1.45em;font-weight:900;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;white-space:nowrap;text-shadow:0 0 6px #000;max-width:100%;overflow:hidden}
+#status .fast{color:var(--c2)}
+#foeRoom{flex:1 1 0;min-height:0}
+#ticker{flex:none;font-size:clamp(11px,min(3.6vw,calc(1.9*var(--vh))),19px);height:1.4em;line-height:1.4em;font-weight:800;opacity:.95;
+  white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 6px #000,0 0 3px #000}
+#ticker.ok{color:#9dff9a}#ticker.ng{color:#ff6b84}#ticker.hl{color:var(--c2)}
+#prompt{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;
+  padding:.1em .7em .25em;border-radius:14px;border:3px solid var(--fc);background:rgba(4,2,10,.72);
+  box-shadow:0 0 16px var(--fc),inset 0 0 18px rgba(0,0,0,.8);max-width:100%}
+/* 敵を札の横に出すとき (縦長で、札の下に余白が無い): 札は左に寄せる */
+#arena.side #prompt{align-self:flex-start;margin-left:2px}
 #prompt.boss{border-width:4px;box-shadow:0 0 22px var(--fc),0 0 50px #ff2040,inset 0 0 18px rgba(0,0,0,.8)}
 #prompt.in{animation:cardin .2s cubic-bezier(.2,1.4,.4,1)}
-@keyframes cardin{0%{transform:translateX(-50%) scale(.2);opacity:0;filter:blur(10px)}100%{transform:translateX(-50%) scale(1);opacity:1;filter:blur(0)}}
-#reading{font-size:min(5vw,2.5vh);font-weight:900;letter-spacing:.12em;text-shadow:0 0 8px #000,0 0 18px var(--c1);line-height:1.15}
-#word{font-size:min(10vw,5.4vh);font-weight:900;line-height:1.08;white-space:nowrap;
+@keyframes cardin{0%{transform:scale(.2);opacity:0;filter:blur(10px)}100%{transform:scale(1);opacity:1;filter:blur(0)}}
+#reading{font-size:clamp(11px,min(4.4vw,calc(2.3*var(--vh))),24px);min-height:1.15em;font-weight:900;letter-spacing:.12em;text-shadow:0 0 8px #000,0 0 18px var(--c1);line-height:1.15}
+#word{font-size:clamp(20px,min(8.6vw,calc(4.8*var(--vh))),52px);min-height:1.08em;font-weight:900;line-height:1.08;white-space:nowrap;
   text-shadow:0 0 6px #000,0 0 22px var(--c0),0 0 48px var(--c1)}
 .hole{display:inline-block;min-width:1em;text-align:center;border:.06em dashed var(--c2);border-radius:.14em;color:var(--c2);
   animation:holeb .5s steps(2) infinite;margin:0 .04em}
@@ -88,18 +99,20 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
   text-shadow:0 0 12px var(--c2),0 0 30px var(--c2),0 0 60px #fff}
 .hole.failed{border-color:transparent;animation:fill .35s cubic-bezier(.2,2,.4,1);color:#ff6b84;text-shadow:0 0 12px #ff0030}
 @keyframes fill{0%{transform:scale(2.4) rotate(12deg)}100%{transform:scale(1)}}
-#foeHp{display:flex;align-items:center;gap:6px;margin-top:.2em;white-space:nowrap;font-weight:900;font-size:min(3.2vw,1.7vh)}
+#foeHp{display:flex;align-items:center;gap:6px;margin-top:.15em;white-space:nowrap;font-weight:900;font-size:clamp(9px,min(2.9vw,calc(1.6*var(--vh))),16px);height:1.3em}
 #foeHp .nm{letter-spacing:.08em;color:var(--fc);text-shadow:0 0 6px #000}
-#foeBar{display:flex;gap:2px;height:1.2vh;min-height:8px}
-#foeBar i{display:block;width:min(2.6vw,1.5vh);background:var(--fc);box-shadow:0 0 6px var(--fc);border-radius:2px;transition:background .15s}
+/* 体力ゲージは幅を決めて、画数ぶんの目盛りで割る (21画のボスでも札が広がりすぎない) */
+#foeBar{display:flex;gap:2px;height:.75em;width:clamp(70px,32vw,190px)}
+#foeBar i{display:block;flex:1;max-width:14px;background:var(--fc);box-shadow:0 0 6px var(--fc);border-radius:2px;transition:background .15s}
 #foeBar i.x{background:#2a2a2a;box-shadow:none}
 #foeBar i.hit{animation:segHit .35s ease-out}
 @keyframes segHit{0%{background:#fff;transform:scaleY(2.4);box-shadow:0 0 14px #fff}}
 #prompt.boss #foeHp .nm{color:#ffd23d;animation:holeb .4s steps(2) infinite}
-#prompt.boss #foeBar{height:1.7vh}
-#prompt.boss #foeBar i{width:min(3vw,1.7vh);background:linear-gradient(#ffe066,#ff2a50);box-shadow:0 0 10px #ff2a50}
+#prompt.boss #foeBar{height:1em}
+#prompt.boss #foeBar i{background:linear-gradient(#ffe066,#ff2a50);box-shadow:0 0 10px #ff2a50}
 #prompt.boss #foeBar i.x{background:#2a2a2a;box-shadow:none}
-#padArea{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:.4vh 0}
+/* 書き取りエリア: 大きさは layoutPad() が px で入れる */
+#padArea{flex:none;width:100%;display:flex;align-items:center;justify-content:center}
 #padWrap{position:relative;border-radius:20px;border:4px solid var(--c1);background:rgba(3,3,12,.9);
   box-shadow:0 0 22px var(--c1),0 0 54px var(--c0),inset 0 0 40px rgba(0,0,0,.8)}
 #padWrap.hit{animation:padhit .35s ease-out}
@@ -109,64 +122,68 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #padWrap.done{animation:paddone .7s ease-out}
 @keyframes paddone{0%{border-color:#fff;box-shadow:0 0 80px #fff,0 0 160px var(--c2),0 0 240px var(--c0),inset 0 0 40px rgba(0,0,0,.8)}}
 #pad{display:block;touch-action:none;cursor:crosshair;border-radius:16px}
-#strokeCnt{position:absolute;right:12px;top:8px;font-weight:900;font-size:min(4.4vw,2.4vh);pointer-events:none;
+#strokeCnt{position:absolute;right:12px;top:8px;font-weight:900;font-size:clamp(11px,min(4vw,calc(2.2*var(--vh))),22px);pointer-events:none;
   font-variant-numeric:tabular-nums;text-shadow:0 0 8px var(--c1);opacity:.85}
-#ctrl{flex:none;display:flex;gap:12px;width:min(100%,520px);padding:0 4px}
-.cbtn{flex:1;font:inherit;font-weight:900;font-size:min(4.6vw,2.5vh);padding:.9vh 0;border-radius:999px;border:3px solid var(--c1);
-  background:rgba(0,0,0,.6);color:#fff;cursor:pointer;box-shadow:0 0 12px var(--c1)}
+/* 操作ボタンは細く */
+#ctrl{flex:none;display:flex;gap:10px;width:min(100%,520px);padding:0 4px;margin-top:4px}
+.cbtn{flex:1;font:inherit;font-weight:900;font-size:clamp(12px,min(4vw,calc(2.2*var(--vh))),20px);padding:.3em 0;border-radius:999px;border:2px solid var(--c1);
+  background:rgba(0,0,0,.6);color:#fff;cursor:pointer;box-shadow:0 0 10px var(--c1);min-height:32px}
 .cbtn:active{transform:scale(.94)}
 .cbtn:disabled{opacity:.35}
-/* 横長の画面: 敵を左、書き取りエリアを右に */
+/* 横長の画面 (縦横比 6:5 以上): 敵を左、書き取りエリアを右に。欄は画面の高さいっぱい */
 @media (min-aspect-ratio:6/5){
+  #top{width:100%}
   #stage{flex-direction:row}
-  #arena{flex:1;height:auto}
-  #padArea{flex:0 0 auto;width:min(60vw,calc(100vh - 11vh - 3.2vh - 2.4vh - 2.8vh - 7vh))}
+  #arena{flex:1 1 0;justify-content:flex-start}
+  #padArea{width:auto;height:100%}
+  #ctrl{margin-left:auto;margin-right:0}
 }
+/* 図鑑の再生・復習の画面でも、字はできるだけ大きく (layoutZPlay / layoutReview が残りの高さから決める) */
 
 /* ───── 叩きつけ文字・ポップ ───── */
 #slam{position:fixed;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;font-weight:900}
-#slam .l1{font-size:min(19vw,14vh);line-height:1;-webkit-text-stroke:2px #fff;opacity:0;filter:drop-shadow(0 0 16px var(--c0)) drop-shadow(0 0 40px var(--c1))}
-#slam .l2{font-size:min(7vw,4.6vh);margin-top:1vh;opacity:0;color:#fff;text-shadow:0 0 10px #000,0 0 24px var(--c2)}
+#slam .l1{font-size:min(19vw,calc(14*var(--vh)));line-height:1;-webkit-text-stroke:2px #fff;opacity:0;filter:drop-shadow(0 0 16px var(--c0)) drop-shadow(0 0 40px var(--c1))}
+#slam .l2{font-size:min(7vw,calc(4.6*var(--vh)));margin-top:calc(1*var(--vh));opacity:0;color:#fff;text-shadow:0 0 10px #000,0 0 24px var(--c2)}
 #slam.go .l1{animation:slam 1.3s cubic-bezier(.2,1.6,.4,1) forwards}
 #slam.go .l2{animation:slam2 1.3s ease-out forwards}
 #slam.quick .l1{animation:slam .62s cubic-bezier(.2,1.6,.4,1) forwards}
 #slam.quick .l2{animation:slam2 .62s ease-out forwards}
-#slam.kanji .l1{font-size:min(46vw,30vh)}
+#slam.kanji .l1{font-size:min(46vw,calc(30*var(--vh)))}
 #slam.red .l1{filter:drop-shadow(0 0 16px #ff0030) drop-shadow(0 0 40px #ff0030)}
 @keyframes slam{0%{transform:scale(4) rotate(-10deg);opacity:0;filter:blur(10px)}14%{transform:scale(.92) rotate(-4deg);opacity:1;filter:blur(0) drop-shadow(0 0 16px var(--c0))}
   24%{transform:scale(1.08) rotate(-4deg)}72%{transform:scale(1) rotate(-4deg);opacity:1}100%{transform:scale(1.35) rotate(-4deg);opacity:0}}
 @keyframes slam2{0%,15%{opacity:0;transform:translateY(30px)}30%,75%{opacity:1;transform:none}100%{opacity:0}}
-.pop{position:fixed;z-index:3;pointer-events:none;font-weight:900;font-size:min(8vw,5vh);white-space:nowrap;
+.pop{position:fixed;z-index:3;pointer-events:none;font-weight:900;font-size:min(8vw,calc(5*var(--vh)));white-space:nowrap;
   animation:popup .85s ease-out forwards;-webkit-text-stroke:1px #000;text-shadow:0 0 12px var(--c2),0 0 26px var(--c0)}
-.pop.big{font-size:min(11vw,7vh);color:var(--c2)}
+.pop.big{font-size:min(11vw,calc(7*var(--vh)));color:var(--c2)}
 .pop.ng{color:#ff4466;text-shadow:0 0 12px #ff0030,0 0 26px #ff0030}
-.pop.dmg{color:#fff;font-size:min(9vw,5.6vh);text-shadow:0 0 10px var(--fc),0 0 24px var(--fc)}
+.pop.dmg{color:#fff;font-size:min(9vw,calc(5.6*var(--vh)));text-shadow:0 0 10px var(--fc),0 0 24px var(--fc)}
 @keyframes popup{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}18%{transform:translate(-50%,-90%) scale(1.35)}100%{transform:translate(-50%,-280%) scale(1);opacity:0}}
 
 /* ───── 結果 ───── */
-#result{justify-content:flex-start;padding-top:max(3vh,env(safe-area-inset-top));overflow-y:auto}
-#rhead{font-size:min(8vw,4.6vh);font-weight:900;letter-spacing:.1em}
-#rank{font-size:min(40vw,22vh);font-weight:900;line-height:1;-webkit-text-stroke:4px #fff;filter:drop-shadow(0 0 20px var(--c0)) drop-shadow(0 0 50px var(--c2))}
-#rscore{font-size:min(13vw,7.4vh);font-weight:900;font-variant-numeric:tabular-nums}
-#rnew{font-size:min(6vw,3.4vh);font-weight:900;color:var(--c2);animation:throb .5s infinite;height:4.2vh}
-#rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,560px);margin:1.4vh 0}
+#result{justify-content:flex-start;padding-top:max(calc(3*var(--vh)),env(safe-area-inset-top));overflow-y:auto}
+#rhead{font-size:min(8vw,calc(4.6*var(--vh)));font-weight:900;letter-spacing:.1em}
+#rank{font-size:min(40vw,calc(22*var(--vh)));font-weight:900;line-height:1;-webkit-text-stroke:4px #fff;filter:drop-shadow(0 0 20px var(--c0)) drop-shadow(0 0 50px var(--c2))}
+#rscore{font-size:min(13vw,calc(7.4*var(--vh)));font-weight:900;font-variant-numeric:tabular-nums}
+#rnew{font-size:min(6vw,calc(3.4*var(--vh)));font-weight:900;color:var(--c2);animation:throb .5s infinite;height:calc(4.2*var(--vh))}
+#rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,560px);margin:calc(1.4*var(--vh)) 0}
 #rgrid div{background:rgba(0,0,0,.5);border:2px solid var(--c1);border-radius:14px;padding:8px 2px;text-align:center;font-weight:900}
-#rgrid b{display:block;font-size:min(6.4vw,3.6vh)}#rgrid span{font-size:min(3vw,1.7vh);opacity:.8}
-.rT{font-weight:900;font-size:min(4.4vw,2.6vh);margin-top:.8vh;text-align:center}
-#rdone{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(94vw,620px);margin-top:.8vh}
-#rdone b{display:inline-block;font-size:min(8vw,4.4vh);line-height:1.2;padding:2px 8px;border-radius:10px;border:2px solid var(--c1);background:rgba(0,0,0,.5)}
+#rgrid b{display:block;font-size:min(6.4vw,calc(3.6*var(--vh)))}#rgrid span{font-size:min(3vw,calc(1.7*var(--vh)));opacity:.8}
+.rT{font-weight:900;font-size:min(4.4vw,calc(2.6*var(--vh)));margin-top:calc(.8*var(--vh));text-align:center}
+#rdone{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(94vw,620px);margin-top:calc(.8*var(--vh))}
+#rdone b{display:inline-block;font-size:min(8vw,calc(4.4*var(--vh)));line-height:1.2;padding:2px 8px;border-radius:10px;border:2px solid var(--c1);background:rgba(0,0,0,.5)}
 #rdone b.gold{border-color:#ffc83d;color:#ffe9a0;box-shadow:0 0 12px #ffc83d}
-#rmiss{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:min(94vw,620px);margin-top:1vh}
+#rmiss{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:min(94vw,620px);margin-top:calc(1*var(--vh))}
 #rmiss div{background:rgba(255,30,70,.25);border:2px solid #ff3355;border-radius:12px;padding:6px 10px;text-align:center;min-width:5em}
-#rmiss b{font-size:min(8vw,4.6vh);display:block;line-height:1.1}#rmiss span{font-size:min(3.2vw,1.8vh)}
-#result .btns{margin:2.2vh 0 4vh}
+#rmiss b{font-size:min(8vw,calc(4.6*var(--vh)));display:block;line-height:1.1}#rmiss span{font-size:min(3.2vw,calc(1.8*var(--vh)))}
+#result .btns{margin:calc(2.2*var(--vh)) 0 calc(4*var(--vh))}
 
 /* ───── 図鑑 ───── */
-#zukan{justify-content:flex-start;padding-top:max(2vh,env(safe-area-inset-top))}
+#zukan{justify-content:flex-start;padding-top:max(calc(2*var(--vh)),env(safe-area-inset-top))}
 #zhead{display:flex;align-items:center;justify-content:space-between;width:min(96vw,760px);flex:none;gap:10px}
-#zhead h2{font-size:min(8vw,4.6vh);font-weight:900}
-#zcount{font-size:min(6vw,3.6vh);font-weight:900;font-variant-numeric:tabular-nums;color:#ffe9a0;text-shadow:0 0 12px #ffc83d}
-#zsub{width:min(96vw,760px);font-size:min(3.4vw,1.9vh);opacity:.8;font-weight:700;margin:.4vh 0 .8vh;flex:none}
+#zhead h2{font-size:min(8vw,calc(4.6*var(--vh)));font-weight:900}
+#zcount{font-size:min(6vw,calc(3.6*var(--vh)));font-weight:900;font-variant-numeric:tabular-nums;color:#ffe9a0;text-shadow:0 0 12px #ffc83d}
+#zsub{width:min(96vw,760px);font-size:min(3.4vw,calc(1.9*var(--vh)));opacity:.8;font-weight:700;margin:calc(.4*var(--vh)) 0 calc(.8*var(--vh));flex:none}
 #zgrid{flex:1;min-height:0;overflow-y:auto;width:min(96vw,760px);display:grid;grid-template-columns:repeat(auto-fill,minmax(min(17vw,64px),1fr));
   gap:6px;padding:4px 4px 12px;align-content:start;-webkit-overflow-scrolling:touch}
 .zc{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:min(9vw,34px);font-weight:900;
@@ -175,35 +192,35 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 .zc.gold{border-color:#ffc83d;box-shadow:0 0 14px #ffc83d;color:#fff6d6;text-shadow:0 0 12px #ffc83d}
 .zc.gold::after{content:"★";position:absolute;right:3px;top:1px;font-size:min(3.4vw,13px);color:#ffd23d;text-shadow:0 0 6px #ffc83d}
 .zc:active{transform:scale(.92)}
-#zbtns{flex:none;display:flex;gap:10px;width:min(96vw,520px);margin:1vh 0 max(1vh,env(safe-area-inset-bottom))}
-#zplay{position:fixed;inset:0;z-index:6;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2vh;padding:14px}
+#zbtns{flex:none;display:flex;gap:10px;width:min(96vw,520px);margin:calc(1*var(--vh)) 0 max(calc(1*var(--vh)),env(safe-area-inset-bottom))}
+#zplay{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1.2*var(--vh));padding:14px}
 #zinfo{text-align:center;font-weight:900}
-#zinfo .w{font-size:min(9vw,5.4vh);text-shadow:0 0 12px var(--c0)}
-#zinfo .r{font-size:min(4.6vw,2.6vh);opacity:.9}
-#zinfo .m{font-size:min(4vw,2.3vh);margin-top:.4vh}
+#zinfo .w{font-size:min(9vw,calc(5.4*var(--vh)));text-shadow:0 0 12px var(--c0)}
+#zinfo .r{font-size:min(4.6vw,calc(2.6*var(--vh)));opacity:.9}
+#zinfo .m{font-size:min(4vw,calc(2.3*var(--vh)));margin-top:calc(.4*var(--vh))}
 #zinfo .m.gold{color:#ffe066;text-shadow:0 0 10px #ffc83d}
 #zcwrap{border-radius:20px;border:4px solid var(--c1);background:rgba(3,3,12,.95);box-shadow:0 0 30px var(--c1)}
 #zcwrap.gold{border-color:#ffc83d;box-shadow:0 0 30px #ffc83d,0 0 70px #ff9d00}
 #zc{display:block;border-radius:16px}
 #zplay .cbtns{display:flex;gap:10px;width:min(90vw,420px)}
-#review{position:fixed;inset:0;z-index:6;background:rgba(14,0,6,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vh;padding:14px;cursor:pointer;text-align:center;font-weight:900}
-#rvhead{font-size:min(5.4vw,3vh);color:#ff8aa0;text-shadow:0 0 12px #ff0040}
+#review{position:fixed;left:0;right:0;top:0;height:calc(100*var(--vh));z-index:6;background:rgba(14,0,6,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1*var(--vh));padding:14px;cursor:pointer;text-align:center;font-weight:900}
+#rvhead{font-size:min(5.4vw,calc(3*var(--vh)));color:#ff8aa0;text-shadow:0 0 12px #ff0040}
 #rvinfo{display:flex;align-items:center;gap:14px}
-#rvK{font-size:min(15vw,8vh);line-height:1;text-shadow:0 0 16px #ff4d6d}
+#rvK{font-size:min(15vw,calc(8*var(--vh)));line-height:1;text-shadow:0 0 16px #ff4d6d}
 #rvinfo .t{text-align:left}
-#rvW{font-size:min(8vw,4.6vh)}
-#rvR{font-size:min(4.6vw,2.6vh);opacity:.9}
+#rvW{font-size:min(8vw,calc(4.6*var(--vh)))}
+#rvR{font-size:min(4.6vw,calc(2.6*var(--vh)));opacity:.9}
 #rvwrap{border-radius:20px;border:4px solid #ff6b84;background:rgba(3,3,12,.95);box-shadow:0 0 30px #ff2050}
 #rvc{display:block;border-radius:16px}
-#rvnote{font-size:min(3.8vw,2.2vh);opacity:.85;font-weight:700}
+#rvnote{font-size:min(3.8vw,calc(2.2*var(--vh)));opacity:.85;font-weight:700}
 #rvnote b{color:#ff8aa0}
-#rvskip{font-size:min(4vw,2.3vh);opacity:.7;animation:rvblink 1.2s ease-in-out infinite}
+#rvskip{font-size:min(4vw,calc(2.3*var(--vh)));opacity:.7;animation:rvblink 1.2s ease-in-out infinite}
 @keyframes rvblink{50%{opacity:.35}}
 
 #mute{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;font-size:22px;background:rgba(0,0,0,.5);
   border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:50%;width:44px;height:44px;cursor:pointer}
-body.playing #mute{opacity:.6}
-body.playing #ctrl{padding-right:56px}
+body.playing #mute{opacity:.6;width:34px;height:34px;font-size:16px;bottom:calc(4px + env(safe-area-inset-bottom));right:8px}
+body.playing #ctrl{padding-right:44px}
 body.inzukan #mute{display:none}
 #meas{position:absolute;width:0;height:0;overflow:hidden;visibility:hidden}
 </style>
@@ -228,20 +245,21 @@ body.inzukan #mute{display:none}
   <div id="top">
     <div id="hud">
       <div class="hbox" id="scoreBox"><div class="lb">SCORE</div><div class="v" id="score">0</div></div>
+      <div id="hp"><span class="lb">HP</span><span id="hearts"></span></div>
       <div id="gaugeSlot"></div>
-      <div class="hbox" id="combo"><div class="lb">COMBO</div><div class="v" id="comboV">0</div><div class="x" id="multV">×1.0</div></div>
+      <div class="hbox" id="combo"><div class="lb">COMBO</div><div class="v"><span id="comboV">0</span><span class="x" id="multV">×1.0</span></div></div>
     </div>
-    <div id="hp"><span class="lb">HP</span><span id="hearts"></span></div>
-    <div id="status"></div>
-    <div id="ticker"></div>
   </div>
   <div id="stage">
     <div id="arena">
+      <div id="status"></div>
       <div id="prompt">
         <div id="reading"></div>
         <div id="word"></div>
         <div id="foeHp"><span class="nm" id="foeName"></span><span id="foeBar"></span></div>
       </div>
+      <div id="foeRoom"></div>
+      <div id="ticker"></div>
     </div>
     <div id="padArea">
       <div id="padWrap"><canvas id="pad"></canvas><div id="strokeCnt"></div></div>
@@ -1069,9 +1087,12 @@ const inkC = document.createElement("canvas"), ictx = inkC.getContext("2d");
 let W = 0, H = 0, DPR = 1, PS = 0; // PS = 書き取りエリアの一辺 (CSS px)
 const gl = bg.getContext("webgl", { antialias: false, alpha: false });
 const BG_SCALE = .5;
+// 画面の高さは実際の表示領域 (innerHeight) を使う。CSS の vh は URL バーを隠した高さなので、Android Chrome のように
+// バーが見えているとはみ出して書き取りエリアが削られる。--vh を innerHeight/100 にして、CSS 側はすべてそれで組む。
 function resize() {
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = innerWidth; H = innerHeight;
+  document.documentElement.style.setProperty("--vh", (H / 100) + "px");
   fxc.width = foeC.width = W * DPR | 0; fxc.height = foeC.height = H * DPR | 0;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   bg.width = Math.max(1, W * DPR * BG_SCALE | 0); bg.height = Math.max(1, H * DPR * BG_SCALE | 0);
@@ -1080,16 +1101,43 @@ function resize() {
   if (!zplayEl.classList.contains("hide")) layoutZPlay();
   if (RV.on) layoutReview();
 }
+// 書き取りエリアの一辺を先に決め、残りを札・敵が分け合う。
+//  縦長: 一辺 = min(画面幅 - 余白と枠, 列の高さ - 札の帯 - 枠)。敵の帯は残り (#arena が flex で受け取る)
+//  横長: 一辺 = min(列の高さ - 枠, 画面幅の 60%)。敵は左
+const PAD_BORDER = 8, PAD_VGAP = 6, PAD_MAX = 760;
+const landscapeMQ = matchMedia("(min-aspect-ratio:6/5)");
 function layoutPad() {
   if ($("#game").classList.contains("hide")) return;
-  const a = padArea.getBoundingClientRect();
-  const s = Math.max(150, Math.floor(Math.min(a.width - 20, a.height - 12, 760)));
+  const st = $("#stage").getBoundingClientRect();
+  let s;
+  if (landscapeMQ.matches) {
+    s = Math.min(st.height - PAD_BORDER - PAD_VGAP, st.width * .6 - PAD_BORDER, PAD_MAX);
+    padArea.style.height = ""; padArea.style.width = Math.floor(Math.max(150, s) + PAD_BORDER + 12) + "px";
+    arena.classList.remove("side");
+  } else {
+    const band = statusEl.offsetHeight + promptEl.offsetHeight + ticker.offsetHeight; // 札の帯 (これだけは必ず残す)
+    s = Math.min(st.width - PAD_BORDER, st.height - band - PAD_BORDER - PAD_VGAP, PAD_MAX);
+    padArea.style.width = ""; padArea.style.height = Math.floor(Math.max(150, s) + PAD_BORDER + PAD_VGAP) + "px";
+  }
+  arenaMode();
+  s = Math.max(150, Math.floor(s));
   if (s === PS && pad.width === (s * DPR | 0)) return;
   PS = s; pad.style.width = pad.style.height = s + "px";
   pad.width = pad.height = inkC.width = inkC.height = s * DPR | 0;
   PAD.drawing = null; renderInk();
 }
+// 縦長で敵を札の下に出すか横に出すか。どちらに置けば敵を大きく描けるかで決める (札の幅は敵ごとに変わるので、敵が出るたびに決めなおす)。
+// 横のほうが SIDE_GAIN 倍以上大きく描けるときだけ横にする (札の下から迫ってくるのが基本の見た目)
+const SIDE_GAIN = 1.3;
+function arenaMode() {
+  if (landscapeMQ.matches || $("#game").classList.contains("hide")) { arena.classList.remove("side"); return; }
+  const aw = arena.clientWidth, ah = arena.clientHeight - statusEl.offsetHeight - ticker.offsetHeight;
+  const spare = ah - promptEl.offsetHeight, sw = aw - promptEl.offsetWidth - 2;
+  const below = Math.min(aw * .5, spare * 1.15, spare / 1.2), side = Math.min(sw * .8, ah / 1.2);
+  arena.classList.toggle("side", side > below * SIDE_GAIN);
+}
 addEventListener("resize", resize);
+if (window.visualViewport) visualViewport.addEventListener("resize", () => { if (innerHeight !== H || innerWidth !== W) resize(); });
 
 // 中央の奥へ吸い込まれるワープトンネル + プラズマ
 let prog = null, U = {};
@@ -1294,19 +1342,25 @@ function drawFx() {
 // トンネルの奥 (札の下) から迫ってくる、角と光る目の影。#foe (書き取りエリアより下の層) に描くので、近づいても書き取りエリアは隠れない。
 let E = null;
 const promptEl = $("#prompt");
+// 敵の入る箱: ふつうは札の下 (ティッカーの行まで)。arena.side のときは札の右。
+// 体 (角から裾まで 約2.3u) が箱からはみ出さない大きさに抑える。書き取りエリアには入らない
 function foeGeom() {
-  const a = arena.getBoundingClientRect(), pr = promptEl.getBoundingClientRect();
-  const top = Math.min(pr.bottom, a.top + a.height * .6), room = Math.max(40, a.bottom - top);
-  const fx0 = a.left + a.width / 2, fy0 = top + room * .42;
-  const base = Math.min(a.width * .5, room * 1.15, 420) * (E && E.boss ? 1.4 : 1);
-  return { a, pr, fx0, fy0, base, bottom: a.bottom };
+  const a = arena.getBoundingClientRect(), pr = promptEl.getBoundingClientRect(), tk = ticker.getBoundingClientRect();
+  const side = arena.classList.contains("side");
+  const top = side ? a.top : pr.bottom, bottom = Math.max(top + 30, tk.top), l = side ? pr.right : a.left, r = a.right;
+  const room = bottom - top, wid = Math.max(40, r - l);
+  const fx0 = (l + r) / 2, fy0 = top + room * .42;
+  const base = Math.min(Math.min(wid * (side ? .8 : .5), room * 1.15, 420) * (E && E.boss ? 1.4 : 1), room / 1.2, wid * .9);
+  return { a, pr, fx0, fy0, base, top, bottom, side, l, r };
 }
 function foePos(g) { // 今の位置と大きさ (u = 体の半分の高さ)
   const p = E.state === "come" ? E.prog : E.endProg, e = p ** 1.35;
-  let u = g.base * (.34 + .66 * e) * .5, x = g.fx0 + Math.sin(fx.t * 1.3 + E.seed) * g.a.width * .06 * (1 - .5 * p), y = lerp(g.fy0, g.bottom - u * .55, e);
+  let u = g.base * (.34 + .66 * e) * .5, x = g.fx0 + Math.sin(fx.t * 1.3 + E.seed) * g.a.width * .06 * (1 - .5 * p), y = lerp(g.fy0, g.bottom - u * .95, e);
   const kn = Math.max(0, 1 - (fx.t - E.hitAt) / .35);
   u *= 1 - .1 * kn; y -= u * .25 * kn;
   if (kn > 0) x += (Math.random() - .5) * u * .12 * kn;
+  y = clamp(y, g.top + u * 1.3, g.bottom - u * .95);
+  x = clamp(x, g.l + u * 1.05, g.r - u * 1.05);
   return { x, y, u };
 }
 function makeShards() {
@@ -1375,8 +1429,14 @@ function drawFoe() {
     c.save(); c.setLineDash([u * .12, u * .08]); c.lineWidth = Math.max(2, u * .035); c.strokeStyle = css(col, .7);
     c.shadowColor = css(col); c.shadowBlur = 8;
     for (const sx of [-1, 1]) {
-      c.beginPath(); c.moveTo(lerp(pr.left, pr.right, sx < 0 ? .2 : .8), pr.bottom - 3);
-      c.quadraticCurveTo(x + sx * u * .8, (pr.bottom + y - u) / 2 + u * .2, x + sx * u * .62, y - u * 1.3); c.stroke();
+      const ex = x + sx * u * .62, ey = y - u * 1.3;
+      if (g.side) { // 札の右の縁から
+        const sy = lerp(pr.top, pr.bottom, sx < 0 ? .3 : .75);
+        c.beginPath(); c.moveTo(pr.right - 3, sy); c.quadraticCurveTo((pr.right + ex) / 2, Math.max(sy, ey) + u * .3, ex, ey); c.stroke();
+      } else {
+        c.beginPath(); c.moveTo(lerp(pr.left, pr.right, sx < 0 ? .2 : .8), pr.bottom - 3);
+        c.quadraticCurveTo(x + sx * u * .8, (pr.bottom + y - u) / 2 + u * .2, ex, ey); c.stroke();
+      }
     }
     c.restore();
   }
@@ -1803,7 +1863,7 @@ function next() {
   }
   PAD.accIdx = -1; PAD.doneAt = -9;
   bHint.disabled = false;
-  renderInk(); updateStatus(); promptIn();
+  renderInk(); updateStatus(); arenaMode(); promptIn();
   if (E.boss && phase === "play") announceBoss();
 }
 function promptIn() { promptEl.classList.remove("in"); void promptEl.offsetWidth; promptEl.classList.add("in"); }
@@ -2019,8 +2079,17 @@ function reviewTarget() { // 書きかけの字が無ければ null
   if (!C || (C.complete && !C.failed) || C.cs.k >= C.paths.length) return null;
   return { item: C.item, own: C.ink.map(s => s.p), rest: C.refPts.slice(C.cs.k), from: C.cs.k };
 }
+// 縦に並んだ画面 (復習・図鑑の再生) で、字の欄をほかの行の残りいっぱいにする
+function fitSquare(wrap, maxS) {
+  const box = wrap.parentElement, cs = getComputedStyle(box), kids = [...box.children].filter(k => k.offsetParent !== null || k === wrap);
+  let used = 0; for (const k of kids) if (k !== wrap) used += k.offsetHeight;
+  const gap = parseFloat(cs.rowGap) || 0, bw = wrap.offsetWidth - wrap.clientWidth;
+  const h = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - used - gap * (kids.length - 1) - bw - 2;
+  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - bw;
+  return Math.floor(Math.max(140, Math.min(w, h, maxS)));
+}
 function layoutReview() {
-  const S = Math.floor(Math.max(160, Math.min(innerWidth * .82, innerHeight * .48, 480)));
+  const S = fitSquare($("#rvwrap"), 760);
   RV.S = S; rvc.style.width = rvc.style.height = S + "px"; rvc.width = rvc.height = S * DPR | 0;
 }
 function openReview(rv) {
@@ -2099,7 +2168,7 @@ function closeZukan() { closeZPlay(); phase = zFrom; show(zFrom); if (zFrom === 
 // 再生: 本人の書き順どおり、画ごとに本人の書いた速さ (0.2〜1.2秒に収める) でなぞる
 const ZP = { k: null, strokes: [], starts: [], durs: [], t0: 0, total: 0, played: -1, S: 0, clean: false, done: false };
 function layoutZPlay() {
-  const S = Math.floor(Math.max(160, Math.min(innerWidth * .86, innerHeight * .55, 520)));
+  const S = fitSquare($("#zcwrap"), 760);
   ZP.S = S; zc.style.width = zc.style.height = S + "px"; zc.width = zc.height = S * DPR | 0;
 }
 function openZPlay(k) {
