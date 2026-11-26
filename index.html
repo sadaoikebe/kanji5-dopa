@@ -221,6 +221,10 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
   border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:50%;width:44px;height:44px;cursor:pointer}
 body.playing #mute{opacity:.6;width:34px;height:34px;font-size:16px;bottom:calc(4px + env(safe-area-inset-bottom));right:8px}
 body.playing #ctrl{padding-right:44px}
+/* バトル中は画面のどこから始まったタッチもブラウザのジェスチャー (スクロール・引っ張り更新・ピンチ・ダブルタップ拡大) にしない。
+   パッドの外 (欄の縁・余白・ボタンの周り) から書き始めた画が奪われないように。touch-action は click を止めないのでボタンのタップはそのまま効く。
+   図鑑など縦にスクロールする画面ではこのクラスが外れる */
+html.playing,html.playing *{touch-action:none}
 body.inzukan #mute{display:none}
 #meas{position:absolute;width:0;height:0;overflow:hidden;visibility:hidden}
 </style>
@@ -1105,6 +1109,9 @@ function resize() {
 //  縦長: 一辺 = min(画面幅 - 余白と枠, 列の高さ - 札の帯 - 枠)。敵の帯は残り (#arena が flex で受け取る)
 //  横長: 一辺 = min(列の高さ - 枠, 画面幅の 60%)。敵は左
 const PAD_BORDER = 8, PAD_VGAP = 6, PAD_MAX = 760;
+// 欄 (canvas) の左右の端を画面の端から離す距離。Android の「戻る」ジェスチャー (画面端およそ 20px) に書き始めの画を奪われないように。
+// ただし欄の一辺は画面幅の PAD_MIN_RATIO を下回らせない (幅 320px の端末では 18px 程度に詰まる)
+const PAD_EDGE = 20, PAD_MIN_RATIO = .885;
 const landscapeMQ = matchMedia("(min-aspect-ratio:6/5)");
 function layoutPad() {
   if ($("#game").classList.contains("hide")) return;
@@ -1112,12 +1119,15 @@ function layoutPad() {
   let s;
   if (landscapeMQ.matches) {
     s = Math.min(st.height - PAD_BORDER - PAD_VGAP, st.width * .6 - PAD_BORDER, PAD_MAX);
+    // 右に寄せた欄の右端も画面の端から PAD_EDGE 以上離す (#game の右の余白 8px + 欄の右の余白 + 枠 4px)
     padArea.style.height = ""; padArea.style.width = Math.floor(Math.max(150, s) + PAD_BORDER + 12) + "px";
+    padArea.style.paddingRight = Math.max(0, PAD_EDGE - 8 - 6 - PAD_BORDER / 2) * 2 + "px";
     arena.classList.remove("side");
   } else {
     const band = statusEl.offsetHeight + promptEl.offsetHeight + ticker.offsetHeight; // 札の帯 (これだけは必ず残す)
-    s = Math.min(st.width - PAD_BORDER, st.height - band - PAD_BORDER - PAD_VGAP, PAD_MAX);
-    padArea.style.width = ""; padArea.style.height = Math.floor(Math.max(150, s) + PAD_BORDER + PAD_VGAP) + "px";
+    const sw = Math.max(innerWidth - 2 * PAD_EDGE, Math.ceil(innerWidth * PAD_MIN_RATIO));
+    s = Math.min(st.width - PAD_BORDER, sw, st.height - band - PAD_BORDER - PAD_VGAP, PAD_MAX);
+    padArea.style.width = ""; padArea.style.paddingRight = ""; padArea.style.height = Math.floor(Math.max(150, s) + PAD_BORDER + PAD_VGAP) + "px";
   }
   arenaMode();
   s = Math.max(150, Math.floor(s));
@@ -1747,6 +1757,7 @@ let holeEl = null;
 function show(id) {
   for (const s of ["title", "game", "result", "zukan"]) $("#" + s).classList.toggle("hide", s !== id);
   document.body.classList.toggle("playing", id === "game");
+  document.documentElement.classList.toggle("playing", id === "game");
   document.body.classList.toggle("inzukan", id === "zukan");
   if (id === "game") layoutPad();
 }
@@ -1786,8 +1797,17 @@ function hurt(n, label) {
   if (G.hp <= 0) gameOver();
 }
 
+// ゲーム開始のタップで全画面にする (ブラウザの UI が消え、引っ張り更新などの余地が無くなる)。
+// 非対応・拒否・すでに全画面なら何もしない。全画面を抜けても resize → layoutPad で組みなおすだけで、ゲームはそのまま続く
+function tryFullscreen() {
+  const de = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  const req = de.requestFullscreen || de.webkitRequestFullscreen;
+  if (!req) return;
+  try { const r = req.call(de, { navigationUI: "hide" }); if (r && r.catch) r.catch(() => {}); } catch {}
+}
 function start(weak) {
-  audio();
+  audio(); tryFullscreen();
   const pool = weak ? weakList() : DATA;
   if (!pool.length) return;
   G = { pool, weak, score: 0, shown: 0, combo: 0, maxCombo: 0, kills: 0, dmg: 0, clean: 0, missStrokes: 0, totalSec: 0, qCount: 0,

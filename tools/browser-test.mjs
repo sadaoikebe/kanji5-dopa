@@ -2,7 +2,11 @@
 //  1. getPointAtLength の標本が Node 側の標本と一致し、ブラウザ標本でも判定が通る/弾くか
 //  2. バトルを実際にマウスで書いて通す: 正しい画で敵を倒す / まちがえた画で暴発ダメージ / 敵の到達でダメージ /
 //     体力0でゲームオーバー → 書きかけの字の復習 (残りの画を書き順どおりに) → 結果 / 復習はタップで飛ばせる /
-//     書きかけの字が無いゲームオーバーは復習なしで結果 / にげる (手動終了) → 結果 / 図鑑に保存されて再生できる / 図鑑の容量と間引き / 旧データ互換
+//     書きかけの字が無いゲームオーバーは復習なしで結果 / にげる (手動終了) → 結果 / 図鑑に保存されて再生できる / 図鑑の容量と間引き / 旧データ互換 /
+//     pointercancel で画が破棄される (インク・ミス・ヒントに数えない)
+//  5. タッチ端末: バトル中は画面全体が touch-action:none / ボタンのタップが効く / タッチで書ける / 全画面の試行と解除で壊れない /
+//     バトル以外 (図鑑) ではスクロールできる
+//   (Android のシステムジェスチャー「戻る」そのものは headless では再現できない)
 // 使い方: PW=/path/to/node_modules/playwright/index.mjs node tools/browser-test.mjs [index.html] [スクショ保存先]
 //   (playwright は同梱しない。npm i playwright && npx playwright install chromium で用意する)
 //   どれかの確認が落ちたら exit 1
@@ -17,8 +21,8 @@ const errors = [];
 let fails = 0;
 const log = s => console.log(s);
 const check = (ok, s) => { if (!ok) fails++; log(`${ok ? "PASS" : "FAIL"}  ${s}`); };
-async function newPage(w, h) {
-  const p = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 2, hasTouch: false });
+async function newPage(w, h, hasTouch = false) {
+  const p = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 2, hasTouch });
   p.on("pageerror", e => errors.push("pageerror: " + e.message));
   p.on("console", m => { if (m.type() === "error") errors.push("console: " + m.text()); });
   await p.goto("file://" + htmlPath);
@@ -89,6 +93,31 @@ await drawStroke(refs[0].filter((_, j) => j % 2 === 0), { wait: 30 });
 s = await S();
 check(s.ck === 1 && s.ehp === s.n - 1 && s.bolts > 0 && s.dmg === 1, `[battle] 正しい1画目 → 雷 (bolts=${s.bolts}) が落ちて敵HP ${s.n}→${s.ehp}, 画ダメージ=${s.dmg}, score=${s.score}`);
 await shot("2-bolt.png");
+// (a2) pointercancel (ブラウザ・OS にジェスチャーとして奪われた画) は捨てる: インクも残らず、ミスにもヒントのカウントにもならない。
+// 正しい画 (確定すれば OK になるもの) と逆向きの画 (確定すれば暴発するもの) の両方で確かめる
+const cancelStroke = (pts, id) => page.evaluate(([pts, id]) => {
+  const r = pad.getBoundingClientRect(), ev = (type, q) => new PointerEvent(type, { pointerId: id, pointerType: "touch", isPrimary: true, bubbles: true, cancelable: true,
+    clientX: r.left + q[0] * r.width / 109, clientY: r.top + q[1] * r.height / 109, button: type === "pointermove" ? -1 : 0, buttons: type === "pointercancel" ? 0 : 1 });
+  const ink = () => { const d = ictx.getImageData(0, 0, inkC.width, inkC.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) n += d[i]; return n; };
+  const snap = () => ({ ck: C.cs.k, ink: C.ink.length, inkPx: ink(), miss: C.miss, streak: C.streak, hint: C.hint, gmiss: G.missStrokes, hp: G.hp, fails: PAD.fails.length,
+    combo: G.combo, dmg: G.dmg, eprog: +E.prog.toFixed(4), stat: JSON.stringify(save.stats[C.item.k] || null), wrong: G.wrong.has(C.item.k) });
+  const before = snap();
+  pad.dispatchEvent(ev("pointerdown", pts[0]));
+  for (let i = 1; i < pts.length; i++) pad.dispatchEvent(ev("pointermove", pts[i]));
+  const drawingMid = !!PAD.drawing && PAD.drawing.pts.length > 3;
+  pad.dispatchEvent(ev("pointercancel", pts[pts.length - 1]));
+  pad.dispatchEvent(ev("lostpointercapture", pts[pts.length - 1])); // 実機では cancel の直後に届く
+  const after = snap();
+  return { drawingMid, drawingAfter: !!PAD.drawing, before, after };
+}, [pts, id]);
+for (const [name, pts] of [["正しい2画目", refs[1]], ["逆向きの2画目", refs[1].slice().reverse()]]) {
+  const cx = await cancelStroke(pts.filter((_, j) => j % 2 === 0), name === "正しい2画目" ? 71 : 72);
+  const same = JSON.stringify(cx.before) === JSON.stringify(cx.after);
+  check(cx.drawingMid && !cx.drawingAfter && same,
+    `[cancel] ${name}を書いている途中で pointercancel → 画は破棄 (書いている最中=${cx.drawingMid}, 破棄後=${!cx.drawingAfter}): インク ${cx.before.ink}→${cx.after.ink}画 (画素 ${cx.before.inkPx}→${cx.after.inkPx}), ` +
+    `ミス ${cx.before.miss}→${cx.after.miss}, ヒントの連続ミス ${cx.before.streak}→${cx.after.streak}, ヒント=${cx.after.hint}, HP ${cx.before.hp}→${cx.after.hp}, 暴発の残像 ${cx.after.fails}, 記録=${cx.after.stat}`);
+}
+await page.waitForTimeout(60);
 for (let i = 1; i < refs.length; i++) await drawStroke(refs[i].filter((_, j) => j % 2 === 0), { wait: i === refs.length - 1 ? 40 : 60 });
 s = await S();
 const z1 = await page.evaluate(k => ({ rec: zukan.z[k], ls: JSON.parse(localStorage.getItem("kanji5dopa.zukan.v1") || "{}"), stats: save.stats[k] }), first);
@@ -103,6 +132,7 @@ await page.evaluate(() => { E.limit = 1e4; });
 s = await S();
 refs = await refsNow();
 log(`[battle] 2体目: ${s.k} (${s.n}画) boss=${s.boss}`);
+s = await S();
 const hp0 = s.hp, p0 = s.eprog;
 await drawStroke(refs[0].slice().reverse().filter((_, j) => j % 2 === 0));
 let s2 = await S();
@@ -290,6 +320,69 @@ refs = await refsNow(land);
 await drawStroke(refs[0].filter((_, j) => j % 2 === 0), { wait: 40 }, land);
 await shot("11-landscape.png", land);
 await land.close();
+
+// ───── 5. タッチ端末 (ジェスチャーに奪われない対策) ─────
+{
+  const tp = await newPage(360, 684, true);
+  const cdp = await tp.context().newCDPSession(tp);
+  const touchDrag = async P => {
+    const tp_ = (x, y) => [{ x, y, id: 1, radiusX: 4, radiusY: 4, force: 1 }];
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: tp_(P[0][0], P[0][1]) });
+    for (let i = 1; i < P.length; i++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: tp_(P[i][0], P[i][1]) });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await tp.waitForTimeout(60);
+  };
+  const ta = () => tp.evaluate(() => {
+    const sel = ["html", "body", "#game", "#top", "#hud", "#stage", "#arena", "#prompt", "#padArea", "#padWrap", "#pad", "#ctrl", "#bHint", "#bQuit", "#mute", "#review", "#zgrid"];
+    return Object.fromEntries(sel.map(q => [q, getComputedStyle($(q)).touchAction]));
+  });
+  const ta0 = await ta();
+  await tp.tap("#bStart", { force: true });
+  await waitPlay(tp);
+  const fs0 = await tp.evaluate(() => ({ fs: !!document.fullscreenElement, api: typeof document.documentElement.requestFullscreen === "function" }));
+  log(`INFO  [touch] スタートのタップで全画面を試行: API あり=${fs0.api}, 全画面になった=${fs0.fs} (headless の結果。実機では端末・ブラウザの設定による)`);
+  const ta1 = await ta();
+  const notNone = Object.entries(ta1).filter(([q, v]) => v !== "none" && q !== "#zgrid");
+  check(notNone.length === 0, `[touch] バトル中は画面全体が touch-action:none (html, body, #game とその中の欄・枠・余白・ボタン・音ボタン・復習表示)${notNone.length ? " 違う: " + JSON.stringify(notNone) : ""}`);
+  check(ta0.html !== "none" && ta0["#zgrid"] !== "none", `[touch] タイトルでは touch-action:none にしない (html=${ta0.html})`);
+  await tp.evaluate(() => { E.limit = 1e4; });
+  // パッドの外 (枠と余白) から書き始めたタッチは画にならず、ミスにもならない
+  const wrap = await tp.locator("#padWrap").boundingBox(), box = await tp.locator("#pad").boundingBox();
+  const m0 = await tp.evaluate(() => ({ ck: C.cs.k, miss: C.miss, hp: G.hp }));
+  await touchDrag([[wrap.x + 1, wrap.y + wrap.height / 2], [wrap.x + 30, wrap.y + wrap.height / 2], [wrap.x + 60, wrap.y + wrap.height / 2 + 5]]);
+  const m1 = await tp.evaluate(() => ({ ck: C.cs.k, miss: C.miss, hp: G.hp, drawing: !!PAD.drawing, scroll: scrollX + scrollY + document.scrollingElement.scrollTop }));
+  check(m1.ck === m0.ck && m1.miss === m0.miss && m1.hp === m0.hp && !m1.drawing && m1.scroll === 0,
+    `[touch] 欄の枠から始めたタッチ → 画にもミスにもならず、画面も動かない (画 ${m0.ck}→${m1.ck}, ミス ${m0.miss}→${m1.miss}, スクロール ${m1.scroll})`);
+  // タッチで正しい1画目を書く
+  const rf = await refsNow(tp);
+  await touchDrag(rf[0].filter((_, j) => j % 2 === 0).map(q => [box.x + q[0] * box.width / 109, box.y + q[1] * box.height / 109]));
+  const t1 = await tp.evaluate(() => ({ ck: C.cs.k, miss: C.miss }));
+  check(t1.ck === 1 && t1.miss === 0, `[touch] タッチで正しい1画目を書く → 画 ${t1.ck}, ミス ${t1.miss}`);
+  // touch-action:none でもボタンのタップ (click) は効く
+  await tp.tap("#bHint", { force: true });
+  const h1 = await tp.evaluate(() => ({ hint: C.hint, ticker: ticker.textContent }));
+  check(h1.hint, `[touch] バトル中にヒントボタンをタップ → 効く (hint=${h1.hint} "${h1.ticker}")`);
+  await tp.tap("#mute", { force: true }); const mu = await tp.evaluate(() => muted); await tp.tap("#mute", { force: true });
+  check(mu === true, `[touch] 音ボタンのタップも効く (muted=${mu})`);
+  // 全画面を抜けても (実機の「戻る」・下から引き出す操作に相当) 続けて遊べる
+  await tp.evaluate(async () => { if (document.fullscreenElement) await document.exitFullscreen(); });
+  await tp.evaluate(() => dispatchEvent(new Event("resize")));
+  await tp.waitForTimeout(200);
+  const af = await tp.evaluate(() => ({ phase, fs: !!document.fullscreenElement, ps: PS, w: pad.getBoundingClientRect().width, cls: document.documentElement.classList.contains("playing") }));
+  const rf2 = await refsNow(tp), box2 = await tp.locator("#pad").boundingBox();
+  await touchDrag(rf2[1].filter((_, j) => j % 2 === 0).map(q => [box2.x + q[0] * box2.width / 109, box2.y + q[1] * box2.height / 109]));
+  const t2 = await tp.evaluate(() => C.cs.k);
+  check(af.phase === "play" && !af.fs && af.cls && Math.abs(af.w - af.ps) < 1 && t2 === 2, `[touch] 全画面を抜けた後もバトルが続き、欄 ${Math.round(af.w)}px のまま 2画目も書ける (画 ${t2})`);
+  await shot("12-touch.png", tp);
+  // にげる → 結果 → 図鑑 は touch-action:none が外れてスクロールできる
+  await tp.tap("#bQuit", { force: true });
+  await tp.waitForFunction(() => !$("#result").classList.contains("hide"), null, { timeout: 5000 });
+  await tp.tap("#bZukan2", { force: true });
+  await tp.waitForFunction(() => phase === "zukan", null, { timeout: 5000 });
+  const ta2 = await ta();
+  check(ta2.html !== "none" && ta2["#zgrid"] !== "none", `[touch] 図鑑ではタッチでスクロールできる (html=${ta2.html} #zgrid=${ta2["#zgrid"]})`);
+  await tp.close();
+}
 
 // ───── 4. 旧データ互換 ─────
 await page.evaluate(() => { localStorage.clear(); localStorage.setItem("kanji5dopa.v1", JSON.stringify({ best: 12345, bestW: 6789, stats: { "圧": [3, 1], "囲": [5, 0, 2, 1] } })); });
